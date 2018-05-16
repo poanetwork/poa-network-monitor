@@ -9,21 +9,17 @@ const testData = require("./test-data/blocks.js");
 const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkConsensusAbi, contracts.PoaNetworkConsensusAddress);
 const utils = require('web3-utils');
 const BN = require('bn.js');
-let validatorsArr = PoaNetworkConsensusContract.methods.getValidators();
-console.log('Validators: ' + validatorsArr + ', validatorsArr.length: ' + validatorsArr.length);
 
 /*
  * Gets the latest round and checks if any validator misses the round
  */
-describe('Network health check', function () {
-    describe('#Check if any validator nodes are missing rounds', function () {
-        let blocksToTest = getBlocksFromLatestRound(validatorsArr.length);
+describe('Network health check',  function () {
+    it('Validators must not miss rounds', async function () {
+        const validatorsArr = await getValidators();
+        let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
         let result = checkRoundInBlocks(blocksToTest, validatorsArr);
-        console.log('Rounds result validators: ' + result.missedValidators + ', passed: ' + result.passed);
-        it('Validators must not miss rounds', function () {
-            assert.ok(result.passed && (result.missedValidators === undefined || result.missedValidators.length === 0),
-                "Validators miss the round!");
-        });
+        assert.ok(result.passed && (result.missedValidators === undefined || result.missedValidators.length === 0),
+            "Validators miss the round!");
     });
 });
 
@@ -31,9 +27,8 @@ describe('Network health check', function () {
 Tests the checkRoundInBlocks function with custom blocks where some validators are missed.
  */
 describe('Test for test', function () {
-    describe('#Check if any validator nodes are missing rounds', function () {
+    describe('#Check if checkRoundInBlocks function can find validators who miss a round', function () {
         let result = checkRoundInBlocks(testData.blocks, testData.validators);
-        console.log('result validators: ' + result.missedValidators + ', passed: ' + result.passed);
         it('Must find validators who miss rounds', function () {
             assert.ok(!result.passed && (JSON.stringify(result.missedValidators) === JSON.stringify(
                 testData.missingValidators)), "Test doesn't find missing validators!");
@@ -43,11 +38,11 @@ describe('Test for test', function () {
 
 /*
 Sends transaction, checks it was confirmed and balance changed properly
-//TODO: check mining
+//TODO: save miner and check for series
  */
 describe('Network health check', function () {
     describe('#Periodically send a series of txs to check that all validator nodes are able to mine non-empty blocks', function () {
-        it('Send transaction', async function () {
+        it('Non-empty block should be mined', async function () {
             this.timeout(config.timeout);
             let amountBN = new BN(config.amountToSend);
             web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
@@ -66,16 +61,34 @@ describe('Network health check', function () {
             const transactionPrice = new BN(config.simpleTransactionCost);
             // Account balance will be reduced by sent amount plus transaction cost
             const amountExpected = amountBN.add(transactionPrice);
-            let amountActual = new BN(initialBalance).sub(new BN(finalBalance));
+            const amountActual = new BN(initialBalance).sub(new BN(finalBalance));
             console.log("amountActual: " + amountActual + ", amountExpected: " + amountExpected);
             assert.ok(amountActual.eq(amountExpected), "Balance after transaction does't match");
-        });
-        it('Validator node should mine block with created transaction', function () {
-            //TODO: check mining
-        });
+            const block = await web3.eth.getBlock(receipt.blockNumber);
+            console.log("miner: " + block.miner + ", blockNumber: " + receipt.blockNumber);
+            assert.ok(validatorExists(block.miner), "Validator doesn't exist or block is not mined!");
 
+            //TODO: save miner and check for series
+        });
     });
 });
+
+async function getValidators() {
+    let validatorsArr = await PoaNetworkConsensusContract.methods.getValidators().call();
+    console.log('getValidators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
+    return validatorsArr;
+}
+
+async function validatorExists(validator) {
+    const validatorsArr = await getValidators();
+    for (let i = 0; i < validatorsArr.length; i++) {
+        if (validator === validatorsArr[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 /**
  * Sends transaction with specified parameters.
@@ -83,7 +96,7 @@ describe('Network health check', function () {
  * @returns {Promise<TransactionReceipt>} Promise - Transaction receipt will be returned after transaction confirmed.
  */
 async function sendTransaction({to, value, from, gasPrice}) {
-    console.log("sendMoney");
+    console.log("sendTransaction");
     return await web3.eth.sendTransaction({
         to,
         value,
@@ -112,13 +125,14 @@ function getValidatorsSet(validators) {
  * @param numberOfValidators
  * @returns {Array}
  */
-function getBlocksFromLatestRound(numberOfValidators) {
-    let lastNum = web3.eth.getBlock('latest').number;
-    let firstNum = lastNum - numberOfValidators + 1;
+async function getBlocksFromLatestRound(numberOfValidators) {
+    const lastBlock = await web3.eth.getBlock('latest');
+    const firstNum = lastBlock.number - numberOfValidators + 1;
     let blocks = [];
     for (let i = 0; i < numberOfValidators; i++) {
-        blocks[i] = web3.eth.getBlock(firstNum + i);
+        blocks[i] = await web3.eth.getBlock(firstNum + i);
     }
+    console.log("getBlocksFromLatestRound blocks.length: " + blocks.length);
     return blocks;
 }
 
@@ -133,6 +147,9 @@ function getBlocksFromLatestRound(numberOfValidators) {
  * Returns object that contains boolean result (true if no validators missed the round) and array of validators that missed the round
  */
 function checkRoundInBlocks(blocks, validatorsArr) {
+    if (validatorsArr.length === 0) {
+        throw ('Validators array must not be empty!');
+    }
     if (validatorsArr.length > blocks.length) {
         throw ('Blocks length must not be less then number of validators');
     }
@@ -142,7 +159,6 @@ function checkRoundInBlocks(blocks, validatorsArr) {
     let result = {passed: true, missedValidators: []};
     for (let i = 0; i < validatorsArr.length; i++) {
         let block = blocks[i];
-        console.log('i: ' + i + ", block.number: " + block.number + ', miner: ' + block.miner);
         if (!validatorsSet.has(block.miner)) {
             throw ("Validator doesn't exist!");
         }
