@@ -51,7 +51,7 @@ describe('Network health check', function () {
             this.timeout(config.timeout);
             let amountBN = new BN(config.amountToSend);
             web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
-            let initialBalance = await web3.eth.getBalance("0xbeaa34084ab851d545e69fe54bb251832424dfcb");
+            let initialBalance = await web3.eth.getBalance(config.accountFromAddress);
             console.log("Balance before transaction: " + initialBalance);
             const receipt = await sendTransaction({
                 to: config.accountToAddress,
