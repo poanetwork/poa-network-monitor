@@ -73,12 +73,21 @@ describe('Network health check', function () {
     });
 });
 
+/**
+ * Method for obtaining validators from the PoaNetworkConsensus contract
+ * @returns {Promise.<*>}
+ */
 async function getValidators() {
     let validatorsArr = await PoaNetworkConsensusContract.methods.getValidators().call();
     console.log('getValidators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
     return validatorsArr;
 }
 
+/**
+ * Checks if certain validator is returned as valid validator from the PoaNetworkConsensus contract
+ * @param validator
+ * @returns {Promise.<boolean>}
+ */
 async function validatorExists(validator) {
     const validatorsArr = await getValidators();
     for (let i = 0; i < validatorsArr.length; i++) {
