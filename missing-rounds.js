@@ -1,11 +1,9 @@
 const {
     web3,
     testData,
-    getValidators
+    getValidators,
+    db
 } = require('./setup.js');
-
-let sqlite3 = require('sqlite3').verbose();
-let db = new sqlite3.Database('testDB.db');
 
 db.serialize(function () {
     // todo: for each network
