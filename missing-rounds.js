@@ -4,20 +4,35 @@ const {
     getValidators
 } = require('./setup.js');
 
+let sqlite3 = require('sqlite3').verbose();
+let db = new sqlite3.Database('testDB.db');
+
+db.serialize(function () {
+    // todo: for each network
+    db.run(" CREATE TABLE IF NOT EXISTS missed_rounds_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " error_message TEXT," +
+        " missedValidators TEXT)");
+});
 
 /*
  * Gets the latest round and checks if any validator misses the round
  */
 async function checkMissingValidators() {
+    console.log("checkMissingValidators");
     const validatorsArr = await getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = checkRoundInBlocks(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
-    //TODO: save result
+    db.serialize(function () {
+        db.run("INSERT INTO missed_rounds_sokol (time, passed, error_message, missedValidators) VALUES ( ?, ?, ?, ?)",
+            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.errorMessage, JSON.stringify(result.missedValidators)]);
+    });
+    db.close();
 }
 
 checkMissingValidators();
-//testCheckRoundInBlocks();
 
 /**
  * Returns the array of latest blocks. Array length will be equal to the number of validators to fit the round.
@@ -57,7 +72,7 @@ function checkRoundInBlocks(blocks, validatorsArr) {
     let validatorsSet = getValidatorsSet(validatorsArr);
     //for storing validators who mined block
     let miningMap = {};
-    let result = {passed: true, missedValidators: []};
+    let result = {passed: true, errorMessage: "", missedValidators: []};
     for (let i = 0; i < validatorsArr.length; i++) {
         let block = blocks[i];
         if (!validatorsSet.has(block.miner)) {
@@ -75,6 +90,7 @@ function checkRoundInBlocks(blocks, validatorsArr) {
         }
     }
     if (!result.passed) {
+        result.errorMessage = "Validator node missed the round!";
         for (let i = 0; i < validatorsArr.length; i++) {
             if (!miningMap[validatorsArr[i]]) {
                 result.missedValidators.push(validatorsArr[i]);

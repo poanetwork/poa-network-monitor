@@ -1,7 +1,7 @@
 
 const fs = require('fs');
 const toml = require('toml');
-const config = toml.parse(fs.readFileSync('.\\test\\test-data\\config.toml', 'utf-8'));
+const config = toml.parse(fs.readFileSync('.\\test-data\\config.toml', 'utf-8'));
 const Web3 = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider(config.url));
 const contracts = require("./test-data/" + config.network + "-contracts.js");
