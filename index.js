@@ -22,7 +22,7 @@ app.get('/', function (req, res) {
                 }
             })
         });
-        txsRuns.map( function(tx) {
+        txsRuns.map(function (tx) {
             tx.transactions = JSON.parse(tx.transactions);
             tx.missedValidators = JSON.parse(tx.missedValidators);
         });
@@ -39,7 +39,7 @@ app.get('/', function (req, res) {
                 }
             })
         });
-        roundsRuns.map( function(run) {
+        roundsRuns.map(function (run) {
             run.missedValidators = JSON.parse(run.missedValidators);
         });
         resultMissingRounds.runs = roundsRuns;

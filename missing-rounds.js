@@ -2,7 +2,8 @@ const {
     web3,
     testData,
     getValidators,
-    db
+    db,
+    checkForMissedValidators
 } = require('./setup.js');
 
 db.serialize(function () {
@@ -10,7 +11,6 @@ db.serialize(function () {
     db.run(" CREATE TABLE IF NOT EXISTS missed_rounds_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-        " error_message TEXT," +
         " missedValidators TEXT)");
 });
 
@@ -21,11 +21,11 @@ async function checkMissingValidators() {
     console.log("checkMissingValidators");
     const validatorsArr = await getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
-    let result = checkRoundInBlocks(blocksToTest, validatorsArr);
+    let result = checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
     db.serialize(function () {
-        db.run("INSERT INTO missed_rounds_sokol (time, passed, error_message, missedValidators) VALUES ( ?, ?, ?, ?)",
-            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.errorMessage, JSON.stringify(result.missedValidators)]);
+        db.run("INSERT INTO missed_rounds_sokol (time, passed, missedValidators) VALUES ( ?, ?, ?)",
+            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
     });
     db.close();
 }
@@ -49,77 +49,14 @@ async function getBlocksFromLatestRound(numberOfValidators) {
     return blocks;
 }
 
-/**
- * Checks if no validator missed a round starting from 0th block in the array of blocks.
- * Checks just first round so to check more rounds it's need to call this function multiple times with different blocks.
- * The number of blocks in the round is the same as number of validators so blocks length must not be less then number of validators.
- *
- * @param blocks - array of blocks
- * @param validatorsArr
- * @returns {{passed: boolean, missedValidators: Array}}
- * Returns object that contains boolean result (true if no validators missed the round) and array of validators that missed the round
- */
-function checkRoundInBlocks(blocks, validatorsArr) {
-    console.log('checkRoundInBlocks: blocks ' + blocks.length + ', validatorsArr: len ' + validatorsArr.length);
-    if (validatorsArr.length === 0) {
-        throw ('Validators array must not be empty!');
-    }
-    if (validatorsArr.length > blocks.length) {
-        throw ('Blocks length must not be less then number of validators');
-    }
-    let validatorsSet = getValidatorsSet(validatorsArr);
-    //for storing validators who mined block
-    let miningMap = {};
-    let result = {passed: true, errorMessage: "", missedValidators: []};
-    for (let i = 0; i < validatorsArr.length; i++) {
-        let block = blocks[i];
-        if (!validatorsSet.has(block.miner)) {
-            throw ("Validator doesn't exist!");
-        }
-        if (miningMap[block.miner]) {
-            console.log('duplicate: ' + block.number + 'miner: ' + block.miner);
-
-            miningMap[block.miner] += 1;
-            result.passed = false;
-        }
-        else {
-            console.log('add miner: ' + block.miner);
-            miningMap[block.miner] = 1;
-        }
-    }
-    if (!result.passed) {
-        result.errorMessage = "Validator node missed the round!";
-        for (let i = 0; i < validatorsArr.length; i++) {
-            if (!miningMap[validatorsArr[i]]) {
-                result.missedValidators.push(validatorsArr[i]);
-                console.log('missed validator: ' + validatorsArr[i]);
-            }
-        }
-    }
-    return result;
-}
-
-/**
- * Creates set from array of validators.
- *
- * @param validators - array of validators
- * @returns {Set} Set of validators
- */
-function getValidatorsSet(validators) {
-    let validatorsSet = new Set();
-    for (let i = 0; i < validators.length; i++) {
-        validatorsSet.add(validators[i]);
-    }
-    return validatorsSet;
-}
-
+//testCheckRoundInBlocks();
 
 /*
 Tests the checkRoundInBlocks function with custom blocks where some validators are missed.
  */
 function testCheckRoundInBlocks() {
     console.log("testCheckRoundInBlocks");
-    let result = checkRoundInBlocks(testData.blocks, testData.validators);
+    let result = checkForMissedValidators(testData.blocks, testData.validators);
     console.log("Found missed validators: " + (!result.passed && (JSON.stringify(result.missedValidators) === JSON.stringify(
         testData.missingValidators))));
 }

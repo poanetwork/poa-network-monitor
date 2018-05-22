@@ -4,7 +4,8 @@ const {
     utils,
     BN,
     getValidators,
-    db
+    db,
+    checkForMissedValidators
 } = require('./setup.js');
 
 db.serialize(function () {
@@ -26,6 +27,7 @@ checkSeriesOfTransactions(3)
 
 //periodically send a series of txs to check that all validator nodes are able to mine non-empty blocks
 async function checkSeriesOfTransactions(numberOfRounds) {
+    // todo: for few rounds
     console.log("checkSeriesOfTransactions");
     const validatorsArr = await getValidators();
     console.log('got validators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
@@ -42,7 +44,7 @@ async function checkSeriesOfTransactions(numberOfRounds) {
             break;
         }
     }
-    let result = checkBlocksWithTransactions(blocksWithTransactions, validatorsArr);
+    let result = checkForMissedValidators(blocksWithTransactions, validatorsArr);
     result.passed = transactionsPassed ? result.passed : false;
     db.serialize(function () {
         db.run("INSERT INTO missed_txs_sokol (time, passed, transactions, missedValidators) VALUES ( ?, ?, ?, ?)",
@@ -54,40 +56,6 @@ async function checkSeriesOfTransactions(numberOfRounds) {
     console.log('result.missedValidators ' + result.missedValidators);
 
     //TODO save number of mined non-empty blocks for every validator
-}
-
-function checkBlocksWithTransactions(blocksWithTransactions, validatorsArr) {
-    let result = {passed: true, missedValidators: []};
-    let previousBlock = -1;
-    let previousValidatorIndex = -1;
-    for (let i = 0; i < blocksWithTransactions.length; i++) {
-        const transactionResult = blocksWithTransactions[i];
-        console.log("blockNumber: " + transactionResult.blockNumber);
-        console.log("miner: " + transactionResult.miner);
-        if (previousBlock === -1) {
-            previousBlock = transactionResult.blockNumber;
-            previousValidatorIndex = validatorsArr.indexOf(transactionResult.miner);
-            console.log("make previousValidatorIndex: " + previousValidatorIndex);
-            continue;
-        }
-        let blocksPassed = transactionResult.blockNumber - previousBlock;
-        console.log("blocksPassed: " + blocksPassed);
-        let expectedValidatorIndex = (previousValidatorIndex + blocksPassed) % validatorsArr.length;
-        console.log("!expValInd: " + expectedValidatorIndex);
-        let expectedValidator = validatorsArr[expectedValidatorIndex];
-        let isPassed = expectedValidator === transactionResult.miner;
-        console.log("expectedValidator: " + expectedValidator + ", actual: " + transactionResult.miner + ", passed: " + isPassed);
-        previousValidatorIndex += blocksPassed;
-        previousBlock = transactionResult.blockNumber;
-
-        if (!isPassed) {
-            result.missedValidators.push(expectedValidator);
-            result.passed = isPassed;
-            //validator missed the round, so next one mined
-            previousValidatorIndex += 1;
-        }
-    }
-    return result;
 }
 
 /**
@@ -110,7 +78,7 @@ Sends transaction, checks it was confirmed and balance changed properly
  */
 async function checkMining(validatorsArr) {
     console.log("checkMining() ");
-    let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
+    let result = {passed: true, number: "", miner: "", transactionHash: "", errorMessage: ""};
     let amountBN = new BN(config.amountToSend);
     await web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
     let initialBalance = await web3.eth.getBalance(config.accountFromAddress);
@@ -139,7 +107,7 @@ async function checkMining(validatorsArr) {
     }
     const block = await web3.eth.getBlock(receipt.blockNumber);
     console.log("miner: " + block.miner + ", blockNumber: " + receipt.blockNumber);
-    result.blockNumber = receipt.blockNumber;
+    result.number = receipt.blockNumber;
     console.log("validatorExists: " + await validatorExists(block.miner, validatorsArr));
     result.miner = block.miner;
     if (!(await validatorExists(block.miner, validatorsArr))) {
