@@ -53,8 +53,8 @@ function checkForMissedValidators(blocks, validatorsArr) {
         console.log("expectedValidator: " + expectedValidator + ", actual: " + block.miner + ", passed: " + isPassed);
         previousValidatorIndex += blocksPassed;
         previousBlock = block.number;
-        result.passed = isPassed;
         if (!isPassed) {
+            result.passed = isPassed;
             result.missedValidators.push(expectedValidator);
             //validator missed the round, so next one mined
             previousValidatorIndex += 1;

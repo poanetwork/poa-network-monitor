@@ -101,9 +101,9 @@ async function checkMining(validatorsArr) {
     const amountExpected = amountBN.add(transactionPrice);
     const amountActual = new BN(initialBalance).sub(new BN(finalBalance));
     if (!amountActual.eq(amountExpected)) {
+        // todo check if there are other txs with same address
         result.passed = false;
         result.errorMessage = "Balance after transaction does't match, expected reduce: " + amountExpected + ", actual: " + amountActual;
-        return result;
     }
     const block = await web3.eth.getBlock(receipt.blockNumber);
     console.log("miner: " + block.miner + ", blockNumber: " + receipt.blockNumber);
@@ -113,7 +113,6 @@ async function checkMining(validatorsArr) {
     if (!(await validatorExists(block.miner, validatorsArr))) {
         result.passed = false;
         result.errorMessage = "Validator " + block.miner + " doesn't exist";
-        return result;
     }
     return result;
 }
