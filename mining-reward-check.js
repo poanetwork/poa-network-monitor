@@ -25,12 +25,11 @@ async function checkMiningReward() {
 checkMiningReward();
 
 /**
- * Checks if no validator missed a round starting from 0th block in the array of blocks.
+ * Checks if miner got right reward for block creation and adding txs to the block
  *
  * @param blocks - array of blocks (or objects with fields number and miner)
  * @param validatorsArr
- * @returns {{passed: boolean, missedValidators: Array}}
- * Returns object that contains boolean result (true if no validators missed the round) and array of validators that missed the round
+ * @returns {Promise.<{passed: boolean, error: string, missedValidators: Array, wrongRewards: Array}>}
  */
 async function checkBlocksRewards(blocks, validatorsArr) {
     // todo: save validators rewards
@@ -63,21 +62,38 @@ async function checkBlocksRewards(blocks, validatorsArr) {
                 previousValidatorIndex += 1;
             }
         }
-        //todo: check if there are other txs for miner
-        let reward = new BN(await web3.eth.getBalance(block.miner, block.number)).sub(new BN(await web3.eth.getBalance(block.miner, block.number - 1)));
-        let rewardExpected = new BN(config.miningReward);
-        console.log("reward: " + reward);
+        //check if there are txs
+        let actualBalanceIncrease = new BN(await web3.eth.getBalance(block.miner, block.number)).sub(new BN(await web3.eth.getBalance(block.miner, block.number - 1)));
+        let expectedBalanceIncrease = new BN(config.miningReward);
+        console.log("reward: " + actualBalanceIncrease);
         console.log("config.miningReward: " + config.miningReward);
-        let isRewardRight = reward.eq(rewardExpected);
+        if (block.transactions.length > 0) {
+            for (let j = 0; j < block.transactions.length; j++) {
+                let receipt = await web3.eth.getTransactionReceipt(block.transactions[j]);
+                let transactionPrice = receipt.gasUsed * await(web3.eth.getGasPrice());
+                console.log("transactionPrice: " + transactionPrice);
+                if (!(block.transactions[j].from === block.miner)) {
+                    expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(transactionPrice));
+                }
+                else if (block.transactions[j].from === block.miner) {
+                    expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(block.transactions[j].value));
+                }
+                else if (block.transactions[j].to === block.miner) {
+                    expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(block.transactions[j].value));
+                }
+            }
+            console.log("rewardExpected: " + expectedBalanceIncrease);
+        }
+        let isRewardRight = actualBalanceIncrease.eq(expectedBalanceIncrease);
         if (!isRewardRight) {
             result.passed = false;
             result.wrongRewards.push({
                 validator: block.miner,
                 block: block.number,
-                expectedReward: rewardExpected,
-                actualReward: reward
+                expectedReward: expectedBalanceIncrease,
+                actualReward: actualBalanceIncrease
             });
-            result.error += "wrong reward, expected: " + rewardExpected + ", actual: " + reward + ", block: " + block.number + "; ";
+            result.error += "wrong reward, expected: " + expectedBalanceIncrease + ", actual: " + actualBalanceIncrease + ", block: " + block.number + "; ";
         }
     }
     return result;

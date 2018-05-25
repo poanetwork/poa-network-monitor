@@ -71,14 +71,16 @@ async function checkMining(validatorsArr) {
     let result = {passed: true, number: "", miner: "", transactionHash: "", errorMessage: ""};
     let amountBN = new BN(config.amountToSend);
     await web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
-    let initialBalance = await web3.eth.getBalance(config.accountFromAddress);
+    let initialBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
+    let initialBalanceTo = await web3.eth.getBalance(config.accountToAddress);
     const receipt = await sendTransaction({
         to: config.accountToAddress,
         value: config.amountToSend,
         from: config.accountFromAddress,
         gasPrice: config.gasPrice
     });
-    const finalBalance = await web3.eth.getBalance(config.accountFromAddress);
+    const finalBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
+    const finalBalanceTo = await web3.eth.getBalance(config.accountToAddress);
     console.log("transactionHash: " + receipt.transactionHash);
     result.transactionHash = receipt.transactionHash;
     if (receipt.transactionHash === undefined || receipt.transactionHash.length === 0) {
@@ -87,13 +89,19 @@ async function checkMining(validatorsArr) {
         return result;
     }
     const transactionPrice = new BN(config.simpleTransactionCost);
+    //Check sender
     // Account balance will be reduced by sent amount and transaction cost
     const amountExpected = amountBN.add(transactionPrice);
-    const amountActual = new BN(initialBalance).sub(new BN(finalBalance));
+    const amountActual = new BN(initialBalanceFrom).sub(new BN(finalBalanceFrom));
     if (!amountActual.eq(amountExpected)) {
-        // todo check if there are other txs with same address
         result.passed = false;
-        result.errorMessage = "Balance after transaction does't match, expected reduce: " + amountExpected + ", actual: " + amountActual;
+        result.errorMessage = "Sender's balance after transaction does't match, expected reduce: " + amountExpected + ", actual: " + amountActual + "; ";
+    }
+    //Check receiver
+    const amountReceived = new BN(finalBalanceTo).sub(new BN(initialBalanceTo));
+    if (!amountReceived.eq(amountBN)) {
+        result.passed = false;
+        result.errorMessage += "Receiver's balance after transaction does't match, expected receiving: " + amountBN + ", actual: " + amountReceived;
     }
     const block = await web3.eth.getBlock(receipt.blockNumber);
     console.log("miner: " + block.miner + ", blockNumber: " + receipt.blockNumber);
