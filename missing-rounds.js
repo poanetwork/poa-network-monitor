@@ -2,28 +2,23 @@ const {
     web3,
     testData,
     getValidators,
-    db,
     checkForMissedValidators,
 } = require('./setup.js');
 
-const {
-    createMissingRoundsDb,
-    addToMissingRounds,
-} = require('./dao.js');
+const {sqlDao} = require('./dao.js');
 
-createMissingRoundsDb();
+sqlDao.createMissingRoundsDb();
 
 /*
  * Gets the latest round and checks if any validator misses the round
  */
 async function checkMissingValidators() {
-
     console.log("checkMissingValidators");
     const validatorsArr = await getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
-    addToMissingRounds([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
+    sqlDao.addToMissingRounds([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
 }
 
 checkMissingValidators();

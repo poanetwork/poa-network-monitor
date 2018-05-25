@@ -7,12 +7,9 @@ const {
     checkForMissedValidators
 } = require('./setup.js');
 
-const {
-    createTxsTable,
-    addToTxsTable,
-} = require('./dao.js');
+const {sqlDao} = require('./dao.js');
 
-createTxsTable();
+sqlDao.createTxsTable();
 
 checkSeriesOfTransactions(3)
     .then(result => {
@@ -43,7 +40,7 @@ async function checkSeriesOfTransactions(numberOfRounds) {
     }
     let result = checkForMissedValidators(blocksWithTransactions, validatorsArr);
     result.passed = transactionsPassed ? result.passed : false;
-    addToTxsTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
+    sqlDao.addToTxsTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
 
     console.log('result.passed ' + result.passed);
     console.log('result.missedValidators ' + result.missedValidators);

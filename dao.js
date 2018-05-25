@@ -27,34 +27,6 @@ function run(sql, params) {
     });
 }
 
-function createMissingRoundsDb() {
-    run(missedRoundsTableCreateSql);
-}
-
-function createRewardTable() {
-    run(miningRewardTableCreateSql);
-}
-
-function createTxsTable() {
-    run(missedTxsTableCreateSql);
-}
-
-function addToMissingRounds(params) {
-    run("INSERT INTO " + missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
-        params);
-}
-
-function addToRewardTable(params) {
-    run("INSERT INTO " + miningRewardTableName + " (time, passed, error, missedValidators, wrongRewards) VALUES ( ?, ?, ?, ?, ?)",
-        params);
-}
-
-function addToTxsTable(params) {
-    run("INSERT INTO " + missedTxsTableName + " (time, passed, transactions, missedValidators) VALUES ( ?, ?, ?, ?)",
-        params);
-}
-
-
 function all(sql, params) {
     return new Promise((resolve, reject) => {
         db.all(sql, params, (err, rows) => {
@@ -69,46 +41,59 @@ function all(sql, params) {
     })
 }
 
-async function getMissedRounds() {
-    return all("SELECT * FROM " + missedRoundsTableName);
-}
+let sqlDao = {
+    createMissingRoundsDb: function () {
+        run(missedRoundsTableCreateSql);
+    },
 
-async function getFailedMissedRounds() {
-    return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0");
-}
+    createRewardTable: function () {
+        run(miningRewardTableCreateSql);
+    },
 
-async function getRewards() {
-    return all("SELECT * FROM " + miningRewardTableName);
-}
+    createTxsTable: function () {
+        run(missedTxsTableCreateSql);
+    },
 
-async function getFailedRewards() {
-    return all("SELECT * FROM " + miningRewardTableName + " where passed = 0");
+    addToMissingRounds: function (params) {
+        run("INSERT INTO " + missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
+            params);
+    },
 
-}
+    addToRewardTable: function (params) {
+        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, missedValidators, wrongRewards) VALUES ( ?, ?, ?, ?, ?)",
+            params);
+    },
 
-async function getMissedTxs() {
-    return all("SELECT * FROM " + missedTxsTableName);
-}
+    addToTxsTable: function (params) {
+        run("INSERT INTO " + missedTxsTableName + " (time, passed, transactions, missedValidators) VALUES ( ?, ?, ?, ?)",
+            params);
+    },
 
-async function getFailedMissedTxs() {
-    return all("SELECT * FROM " + missedTxsTableName + " where passed = 0");
+    getMissedRounds: async function () {
+        return all("SELECT * FROM " + missedRoundsTableName);
+    },
 
-}
+    getFailedMissedRounds: async function () {
+        return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0");
+    },
+
+    getRewards: async function () {
+        return all("SELECT * FROM " + miningRewardTableName);
+    },
+
+    getFailedRewards: async function () {
+        return all("SELECT * FROM " + miningRewardTableName + " where passed = 0");
+    },
+
+    getMissedTxs: async function () {
+        return all("SELECT * FROM " + missedTxsTableName);
+    },
+
+    getFailedMissedTxs: async function () {
+        return all("SELECT * FROM " + missedTxsTableName + " where passed = 0");
+    }
+};
 
 module.exports = {
-    createMissingRoundsDb,
-    createRewardTable,
-    createTxsTable,
-
-    addToMissingRounds,
-    addToRewardTable,
-    addToTxsTable,
-
-    getMissedRounds,
-    getRewards,
-    getMissedTxs,
-
-    getFailedMissedRounds,
-    getFailedRewards,
-    getFailedMissedTxs
+    sqlDao,
 };

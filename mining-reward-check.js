@@ -6,12 +6,9 @@ const {
     getValidators,
 } = require('./setup.js');
 
-const {
-    createRewardTable,
-    addToRewardTable,
-} = require('./dao.js');
+const {sqlDao} = require('./dao.js');
 
-createRewardTable();
+sqlDao.createRewardTable();
 
 /*
  * Gets the latest round and checks if any validator misses the round
@@ -22,7 +19,7 @@ async function checkMiningReward() {
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = await checkBlocksRewards(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators: " + result.missedValidators + ", wrongRewards: " + result.wrongRewards);
-    addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.missedValidators), JSON.stringify(result.wrongRewards)]);
+    sqlDao.addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.missedValidators), JSON.stringify(result.wrongRewards)]);
 }
 
 checkMiningReward();

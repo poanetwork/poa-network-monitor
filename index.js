@@ -1,12 +1,4 @@
-const {
-    getMissedRounds,
-    getRewards,
-    getMissedTxs,
-    getFailedMissedRounds,
-    getFailedRewards,
-    getFailedMissedTxs
-} = require('./dao.js');
-
+const {sqlDao} = require('./dao.js');
 let express = require('express');
 let app = express();
 
@@ -15,7 +7,6 @@ app.get('/', async function (req, res) {
     console.log("send result: " + JSON.stringify(result));
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(result));
-
 });
 
 app.get('/failed', async function (req, res) {
@@ -37,12 +28,19 @@ async function getTests(passed) {
     };
 
     let txsRuns;
+    let roundsRuns;
+    let rewardsRuns;
     if (passed) {
-        txsRuns = await getMissedTxs();
+        txsRuns = await sqlDao.getMissedTxs();
+        roundsRuns = await sqlDao.getMissedRounds();
+        rewardsRuns = await   sqlDao.getRewards();
     }
     else {
-        txsRuns = await getFailedMissedTxs();
+        txsRuns = await sqlDao.getFailedMissedTxs();
+        roundsRuns = await sqlDao.getFailedMissedRounds();
+        rewardsRuns = await   sqlDao.getFailedRewards();
     }
+
     if (txsRuns.length > 0) {
         txsRuns.map(function (tx) {
             tx.transactions = JSON.parse(tx.transactions);
@@ -51,28 +49,13 @@ async function getTests(passed) {
         resultMissingTxs.runs = txsRuns;
     }
 
-    let roundsRuns;
-    if (passed) {
-        roundsRuns = await getMissedRounds();
-    }
-    else {
-        roundsRuns = await getFailedMissedRounds();
-    }
     if (roundsRuns.length > 0) {
         roundsRuns.map(function (run) {
             run.missedValidators = JSON.parse(run.missedValidators);
         });
         resultMissingRounds.runs = roundsRuns;
-
     }
 
-    let rewardsRuns;
-    if (passed) {
-        rewardsRuns = await getRewards();
-    }
-    else {
-        rewardsRuns = await getFailedRewards();
-    }
     if (rewardsRuns.length > 0) {
         rewardsRuns.map(function (run) {
             run.wrongRewards = JSON.parse(run.wrongRewards);
@@ -80,6 +63,7 @@ async function getTests(passed) {
         });
         resultMiningReward.runs = rewardsRuns;
     }
+
     return {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
