@@ -2,21 +2,16 @@
 const {
     config,
     web3,
-    testData,
     BN,
     getValidators,
-    db,
 } = require('./setup.js');
 
-db.serialize(function () {
-    // todo: for each network
-    db.run(" CREATE TABLE IF NOT EXISTS mining_reward_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-        " time TEXT," +
-        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-        " error TEXT," +
-        " wrongRewards TEXT," +
-        " missedValidators TEXT)");
-});
+const {
+    createRewardTable,
+    addToRewardTable,
+} = require('./dao.js');
+
+createRewardTable();
 
 /*
  * Gets the latest round and checks if any validator misses the round
@@ -27,11 +22,7 @@ async function checkMiningReward() {
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = await checkBlocksRewards(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators: " + result.missedValidators + ", wrongRewards: " + result.wrongRewards);
-    db.serialize(function () {
-        db.run("INSERT INTO mining_reward_sokol (time, passed, error, missedValidators, wrongRewards) VALUES ( ?, ?, ?, ?)",
-            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.missedValidators), JSON.stringify(result.wrongRewards)]);
-    });
-    db.close();
+    addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.missedValidators), JSON.stringify(result.wrongRewards)]);
 }
 
 checkMiningReward();

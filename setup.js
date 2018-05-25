@@ -3,14 +3,14 @@ const toml = require('toml');
 const config = toml.parse(fs.readFileSync('./test-data/config.toml', 'utf-8'));
 const Web3 = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider(config.url));
-const contracts = require("./test-data/" + config.network + "-contracts.js");
+const network = config.network;
+const contracts = require("./test-data/" + network + "-contracts.js");
 const testData = require("./test-data/blocks.js");
 const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkConsensusAbi, contracts.PoaNetworkConsensusAddress);
 const utils = require('web3-utils');
 const BN = require('bn.js');
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('testDB.db');
-
+const db =  new sqlite3.Database('testDB.db');
 
 /**
  * Obtains validators from the PoaNetworkConsensus contract
@@ -71,6 +71,7 @@ module.exports = {
     BN,
     getValidators,
     db,
-    checkForMissedValidators
+    checkForMissedValidators,
+    network
 };
 

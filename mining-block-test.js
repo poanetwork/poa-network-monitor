@@ -4,18 +4,15 @@ const {
     utils,
     BN,
     getValidators,
-    db,
     checkForMissedValidators
 } = require('./setup.js');
 
-db.serialize(function () {
-    // todo: for each network
-    db.run(" CREATE TABLE IF NOT EXISTS missed_txs_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-        " time TEXT," +
-        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-        " transactions TEXT," +
-        " missedValidators TEXT)");
-});
+const {
+    createTxsTable,
+    addToTxsTable,
+} = require('./dao.js');
+
+createTxsTable();
 
 checkSeriesOfTransactions(3)
     .then(result => {
@@ -46,11 +43,7 @@ async function checkSeriesOfTransactions(numberOfRounds) {
     }
     let result = checkForMissedValidators(blocksWithTransactions, validatorsArr);
     result.passed = transactionsPassed ? result.passed : false;
-    db.serialize(function () {
-        db.run("INSERT INTO missed_txs_sokol (time, passed, transactions, missedValidators) VALUES ( ?, ?, ?, ?)",
-            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
-    });
-    db.close();
+    addToTxsTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
 
     console.log('result.passed ' + result.passed);
     console.log('result.missedValidators ' + result.missedValidators);

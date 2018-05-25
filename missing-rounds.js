@@ -3,31 +3,27 @@ const {
     testData,
     getValidators,
     db,
-    checkForMissedValidators
+    checkForMissedValidators,
 } = require('./setup.js');
 
-db.serialize(function () {
-    // todo: for each network
-    db.run(" CREATE TABLE IF NOT EXISTS missed_rounds_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-        " time TEXT," +
-        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-        " missedValidators TEXT)");
-});
+const {
+    createMissingRoundsDb,
+    addToMissingRounds,
+} = require('./dao.js');
+
+createMissingRoundsDb();
 
 /*
  * Gets the latest round and checks if any validator misses the round
  */
 async function checkMissingValidators() {
+
     console.log("checkMissingValidators");
     const validatorsArr = await getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
-    db.serialize(function () {
-        db.run("INSERT INTO missed_rounds_sokol (time, passed, missedValidators) VALUES ( ?, ?, ?)",
-            [new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
-    });
-    db.close();
+    addToMissingRounds([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
 }
 
 checkMissingValidators();
