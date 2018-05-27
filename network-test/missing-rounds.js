@@ -3,9 +3,9 @@ const {
     testData,
     getValidators,
     checkForMissedValidators,
-} = require('./setup.js');
+} = require('./test-helper.js');
 
-const {sqlDao} = require('./dao.js');
+const {sqlDao} = require('../common/dao.js');
 
 sqlDao.createMissingRoundsDb();
 

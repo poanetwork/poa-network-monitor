@@ -1,6 +1,6 @@
 const {
     web3,
-} = require('./setup.js');
+} = require('../network-test/test-helper.js');
 
 function createAccount() {
     console.log("createAccount");

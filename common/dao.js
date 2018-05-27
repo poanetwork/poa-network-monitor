@@ -1,7 +1,7 @@
 const {
     db,
     network
-} = require('./setup.js');
+} = require('../network-test/test-helper.js');
 const missedRoundsTableName = "missed_rounds_" + network;
 const miningRewardTableName = "mining_reward_" + network;
 const missedTxsTableName = "missed_txs_" + network;

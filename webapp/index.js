@@ -1,19 +1,21 @@
-const {sqlDao} = require('./dao.js');
+const {sqlDao} = require('../common/dao.js');
 let express = require('express');
 let app = express();
 
-app.get('/', async function (req, res) {
-    let result = await getTests(true);
+function sendJson(result, response) {
     console.log("send result: " + JSON.stringify(result));
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(result));
+    response.setHeader('Content-Type', 'application/json');
+    response.send(JSON.stringify(result));
+}
+
+app.get('/api/all', async function (request, response) {
+    let result = await getTests(true);
+    sendJson(result, response);
 });
 
-app.get('/failed', async function (req, res) {
+app.get('/api/failed', async function (request, response) {
     let result = await getTests(false);
-    console.log("send result: " + JSON.stringify(result));
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(result));
+    sendJson(result, response);
 });
 
 async function getTests(passed) {

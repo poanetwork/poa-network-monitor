@@ -10,7 +10,7 @@ const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkCo
 const utils = require('web3-utils');
 const BN = require('bn.js');
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('testDB.db');
+const db = new sqlite3.Database('../poa_monitor.db');
 
 /**
  * Obtains validators from the PoaNetworkConsensus contract
