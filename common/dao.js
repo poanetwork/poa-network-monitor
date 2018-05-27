@@ -1,10 +1,12 @@
 const {
-    db,
-    network
-} = require('../network-test/test-helper.js');
-const missedRoundsTableName = "missed_rounds_" + network;
-const miningRewardTableName = "mining_reward_" + network;
-const missedTxsTableName = "missed_txs_" + network;
+    networkName
+} = require('./config.js');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./poa_monitor.db');
+
+const missedRoundsTableName = "missed_rounds_" + networkName;
+const miningRewardTableName = "mining_reward_" + networkName;
+const missedTxsTableName = "missed_txs_" + networkName;
 const missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +

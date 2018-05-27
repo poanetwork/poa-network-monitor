@@ -1,8 +1,7 @@
 const {
     web3,
     testData,
-    getValidators,
-    checkForMissedValidators,
+    testHelper,
 } = require('./test-helper.js');
 
 const {sqlDao} = require('../common/dao.js');
@@ -14,9 +13,9 @@ sqlDao.createMissingRoundsDb();
  */
 async function checkMissingValidators() {
     console.log("checkMissingValidators");
-    const validatorsArr = await getValidators();
+    const validatorsArr = await testHelper.getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
-    let result = checkForMissedValidators(blocksToTest, validatorsArr);
+    let result = testHelper.checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
     sqlDao.addToMissingRounds([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
 }
@@ -47,7 +46,7 @@ Tests the checkRoundInBlocks function with custom blocks where some validators a
  */
 function testCheckRoundInBlocks() {
     console.log("testCheckRoundInBlocks");
-    let result = checkForMissedValidators(testData.blocks, testData.validators);
+    let result = testHelper.checkForMissedValidators(testData.blocks, testData.validators);
     console.log("Found missed validators: " + (!result.passed && (JSON.stringify(result.missedValidators) === JSON.stringify(
         testData.missingValidators))));
 }

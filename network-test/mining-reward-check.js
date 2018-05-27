@@ -3,7 +3,7 @@ const {
     config,
     web3,
     BN,
-    getValidators,
+    testHelper,
 } = require('./test-helper.js');
 
 const {sqlDao} = require('../common/dao.js');
@@ -15,7 +15,7 @@ sqlDao.createRewardTable();
  */
 async function checkMiningReward() {
     console.log("checkMiningReward");
-    const validatorsArr = await getValidators();
+    const validatorsArr = await testHelper.getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = await checkBlocksRewards(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators: " + result.missedValidators + ", wrongRewards: " + result.wrongRewards);

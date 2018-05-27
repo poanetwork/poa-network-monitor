@@ -3,8 +3,7 @@ const {
     web3,
     utils,
     BN,
-    getValidators,
-    checkForMissedValidators
+    testHelper
 } = require('./test-helper.js');
 
 const {sqlDao} = require('../common/dao.js');
@@ -23,7 +22,7 @@ checkSeriesOfTransactions(3)
 async function checkSeriesOfTransactions(numberOfRounds) {
     // todo: for few rounds
     console.log("checkSeriesOfTransactions");
-    const validatorsArr = await getValidators();
+    const validatorsArr = await testHelper.getValidators();
     console.log('got validators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
     let blocksWithTransactions = [];
     let transactionsPassed = true;
@@ -38,7 +37,7 @@ async function checkSeriesOfTransactions(numberOfRounds) {
             break;
         }
     }
-    let result = checkForMissedValidators(blocksWithTransactions, validatorsArr);
+    let result = testHelper.checkForMissedValidators(blocksWithTransactions, validatorsArr);
     result.passed = transactionsPassed ? result.passed : false;
     sqlDao.addToTxsTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
 
