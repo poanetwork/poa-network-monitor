@@ -3,22 +3,25 @@ let express = require('express');
 let app = express();
 
 function sendJson(result, response) {
-    console.log("send result: " + JSON.stringify(result));
     response.setHeader('Content-Type', 'application/json');
     response.send(JSON.stringify(result));
 }
 
 app.get('/api/all', async function (request, response) {
-    let result = await getTests(true);
+    let fromTime = request.query["from"];
+    console.log("fromTime: " + fromTime);
+    let result = await getTests(true, fromTime);
     sendJson(result, response);
 });
 
 app.get('/api/failed', async function (request, response) {
-    let result = await getTests(false);
+    let fromTime = request.query["from"];
+    console.log("fromTime: " + fromTime);
+    let result = await getTests(false, fromTime);
     sendJson(result, response);
 });
 
-async function getTests(passed) {
+async function getTests(passed, fromTime) {
     let resultMissingRounds = {description: "Check if any validator nodes are missing rounds", runs: []};
     let resultMissingTxs = {
         description: "Check that all validator nodes are able to mine non-empty blocks",
@@ -33,14 +36,14 @@ async function getTests(passed) {
     let roundsRuns;
     let rewardsRuns;
     if (passed) {
-        txsRuns = await sqlDao.getMissedTxs();
-        roundsRuns = await sqlDao.getMissedRounds();
-        rewardsRuns = await   sqlDao.getRewards();
+        txsRuns = await sqlDao.getMissedTxs(fromTime);
+        roundsRuns = await sqlDao.getMissedRounds(fromTime);
+        rewardsRuns = await sqlDao.getRewards(fromTime);
     }
     else {
-        txsRuns = await sqlDao.getFailedMissedTxs();
-        roundsRuns = await sqlDao.getFailedMissedRounds();
-        rewardsRuns = await   sqlDao.getFailedRewards();
+        txsRuns = await sqlDao.getFailedMissedTxs(fromTime);
+        roundsRuns = await sqlDao.getFailedMissedRounds(fromTime);
+        rewardsRuns = await sqlDao.getFailedRewards(fromTime);
     }
 
     if (txsRuns.length > 0) {

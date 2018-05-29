@@ -71,28 +71,62 @@ let sqlDao = {
             params);
     },
 
-    getMissedRounds: async function () {
-        return all("SELECT * FROM " + missedRoundsTableName);
+    getMissedRounds: async function (fromTime) {
+        console.log("getMissedRounds, fromTime: " + fromTime);
+        if (fromTime) {
+            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+            console.log("beginTime: " + beginTime);
+            return all("SELECT * FROM " + missedRoundsTableName + " where  time >= '" + beginTime + "'");
+        }
+        else {
+            return all("SELECT * FROM " + missedRoundsTableName);
+        }
     },
 
-    getFailedMissedRounds: async function () {
-        return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0");
+    getFailedMissedRounds: async function (fromTime) {
+        if (fromTime) {
+            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+            console.log("beginTime: " + beginTime);
+            return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0 and  time >= '" + beginTime + "'");
+        }
+        else {
+            return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0");
+        }
     },
 
-    getRewards: async function () {
-        return all("SELECT * FROM " + miningRewardTableName);
+    getRewards: async function (fromTime) {
+        if (fromTime) {
+            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+            return all("SELECT * FROM " + miningRewardTableName + " where  time >= '" + beginTime + "'");
+        }
+        else {
+            return all("SELECT * FROM " + miningRewardTableName);
+        }
     },
 
-    getFailedRewards: async function () {
-        return all("SELECT * FROM " + miningRewardTableName + " where passed = 0");
+    getFailedRewards: async function (fromTime) {
+        if (fromTime) {
+            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+            return all("SELECT * FROM " + miningRewardTableName + " where passed = 0 and  time >= '" + beginTime + "'");
+        }
+        else {
+            return all("SELECT * FROM " + miningRewardTableName + " where passed = 0");
+        }
     },
 
-    getMissedTxs: async function () {
-        return all("SELECT * FROM " + missedTxsTableName);
+    getMissedTxs: async function (fromTime) {
+        if (fromTime) {
+            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+            return all("SELECT * FROM " + missedTxsTableName + " where  time >= '" + beginTime + "'");
+        }
+        else {
+            return all("SELECT * FROM " + missedTxsTableName);
+        }
     },
 
-    getFailedMissedTxs: async function () {
-        return all("SELECT * FROM " + missedTxsTableName + " where passed = 0");
+    getFailedMissedTxs: async function (fromTime) {
+        let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
+        return all("SELECT * FROM " + missedTxsTableName + " where passed = 0 and  time >= '" + beginTime + "'");
     }
 };
 
