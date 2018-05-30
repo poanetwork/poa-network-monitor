@@ -9,6 +9,9 @@ function sendJson(result, response) {
 
 app.get('/api/all', async function (request, response) {
     let fromTime = request.query["from"];
+    if (!(Number.isInteger(fromTime) && fromTime >= 0)) {
+        fromTime = undefined;
+    }
     console.log("fromTime: " + fromTime);
     let result = await getTests(true, fromTime);
     sendJson(result, response);
@@ -16,6 +19,9 @@ app.get('/api/all', async function (request, response) {
 
 app.get('/api/failed', async function (request, response) {
     let fromTime = request.query["from"];
+    if (!(Number.isInteger(fromTime) && fromTime >= 0)) {
+        fromTime = undefined;
+    }
     console.log("fromTime: " + fromTime);
     let result = await getTests(false, fromTime);
     sendJson(result, response);
@@ -28,7 +34,7 @@ async function getTests(passed, fromTime) {
         runs: []
     };
     let resultMiningReward = {
-        description: "check if payout script works properly for all nodes (check mining address balance)",
+        description: "Check if payout script works properly for all nodes (check mining address balance)",
         runs: []
     };
 

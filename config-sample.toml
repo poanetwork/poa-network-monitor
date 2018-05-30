@@ -15,3 +15,6 @@ simpleTransactionGas = "21000"
 simpleTransactionCost = "21000000000000" # equals to gas multipty by gascost: 21000 * 1000000000
 amountToSend = "20000000000"
 miningReward = "1000000000000000000"
+
+#slack
+slackWebHookUrl = 'https://hooks.slack.com/services/............token'
