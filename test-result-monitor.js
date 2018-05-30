@@ -42,7 +42,8 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[0];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + ",\nerror: " + run.error + ",\nmissed validators: " + run.missedValidators + ",\nwrongRewards: " + run.wrongRewards + "\n"
+                    let missedValidators = run.missedValidators.length > 0 ? (",\nmissed validators: " + run.missedValidators) : "";
+                    let runsMessage = "Time: " + run.time + ",\nerror: " + run.error + missedValidators + "\n"
                     await sendAttachment("", runsMessage, "");
                 }
             }
@@ -55,7 +56,9 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[0];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + ",\nerror: " + run.errorMessage + ",\nmissed validators: " + run.missedValidators + "\n";
+                    let errorMessage = run.errorMessage ? (",\nerror: " + run.errorMessage) : "";
+                    let missedValidators = run.missedValidators.length > 0 ? (",\nmissed validators: " + run.missedValidators) : "";
+                    let runsMessage = "time: " + run.time + errorMessage + missedValidators;
                     await sendAttachment("", runsMessage, "");
                     let txs = run.transactions;
                     for (let i = 0; i < txs.length; i++) {
