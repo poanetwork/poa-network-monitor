@@ -9,7 +9,7 @@ function sendJson(result, response) {
 
 app.get('/api/all', async function (request, response) {
     let fromTime = request.query["from"];
-    if (!(Number.isInteger(fromTime) && fromTime >= 0)) {
+    if (!(Number.isInteger(fromTime) && fromTime > 0)) {
         fromTime = undefined;
     }
     console.log("fromTime: " + fromTime);
@@ -19,7 +19,7 @@ app.get('/api/all', async function (request, response) {
 
 app.get('/api/failed', async function (request, response) {
     let fromTime = request.query["from"];
-    if (!(Number.isInteger(fromTime) && fromTime >= 0)) {
+    if (!(Number.isInteger(fromTime) && fromTime > 0)) {
         fromTime = undefined;
     }
     console.log("fromTime: " + fromTime);
@@ -70,7 +70,6 @@ async function getTests(passed, fromTime) {
     if (rewardsRuns.length > 0) {
         rewardsRuns.map(function (run) {
             run.wrongRewards = JSON.parse(run.wrongRewards);
-            run.missedValidators = JSON.parse(run.missedValidators);
         });
         resultMiningReward.runs = rewardsRuns;
     }
@@ -82,6 +81,13 @@ async function getTests(passed, fromTime) {
     };
 }
 
+function createTablesIfNotExist() {
+    sqlDao.createMissingRoundsTable();
+    sqlDao.createRewardTable();
+    sqlDao.createTxsTable();
+}
+
 app.listen(3000, function () {
     console.log('Listening.. ');
+    createTablesIfNotExist();
 });

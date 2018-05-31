@@ -5,7 +5,7 @@ const https = require('http');
 let time = 3600;
 process.argv.forEach(function (val, index, array) {
     console.log(index + ': ' + val);
-    if (!(Number.isInteger(val) && val >= 0)) {
+    if (!(Number.isInteger(val) && val > 0)) {
         time = val;
         console.log('time: ' + time);
     }
@@ -42,8 +42,7 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let missedValidators = run.missedValidators.length > 0 ? (",\nmissed validators: " + run.missedValidators) : "";
-                    let runsMessage = "Time: " + run.time + ",\nerror: " + run.error + missedValidators + "\n"
+                    let runsMessage = "Time: " + run.time + ",\nerror: " + run.error + "\n"
                     await sendAttachment("", runsMessage, "");
                 }
             }
@@ -68,6 +67,7 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
     console.log("Error: " + err.message);
 });
 
+//todo color
 function sendAttachment(messageTitle, messageValue, messageText) {
     let messages = {
         text: messageText,

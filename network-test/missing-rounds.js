@@ -6,7 +6,7 @@ const {
 
 const {sqlDao} = require('../common/dao.js');
 
-sqlDao.createMissingRoundsDb();
+sqlDao.createMissingRoundsTable();
 
 /*
  * Gets the latest round and checks if any validator misses the round

@@ -18,8 +18,8 @@ async function checkMiningReward() {
     const validatorsArr = await testHelper.getValidators();
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = await checkBlocksRewards(blocksToTest, validatorsArr);
-    console.log("passed: " + result.passed + ", result.missedValidators: " + result.missedValidators + ", wrongRewards: " + result.wrongRewards);
-    sqlDao.addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.missedValidators), JSON.stringify(result.wrongRewards)]);
+    console.log("passed: " + result.passed + ", wrongRewards: " + JSON.stringify(result.wrongRewards));
+    sqlDao.addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error, JSON.stringify(result.wrongRewards)]);
 }
 
 checkMiningReward();
@@ -29,47 +29,22 @@ checkMiningReward();
  *
  * @param blocks - array of blocks (or objects with fields number and miner)
  * @param validatorsArr
- * @returns {Promise.<{passed: boolean, error: string, missedValidators: Array, wrongRewards: Array}>}
+ * @returns {Promise.<{passed: boolean, error: string,  wrongRewards: Array}>}
  */
 async function checkBlocksRewards(blocks, validatorsArr) {
     // todo: save validators rewards
-    let result = {passed: true, error: "", missedValidators: [], wrongRewards: []};
-    let previousBlock = -1;
-    let previousValidatorIndex = -1;
+    let result = {passed: true, error: "", wrongRewards: []};
     for (let i = 0; i < blocks.length; i++) {
         const block = blocks[i];
-        console.log("number: " + block.number);
-        console.log("miner: " + block.miner);
-        if (previousBlock === -1) {
-            previousBlock = block.number;
-            previousValidatorIndex = validatorsArr.indexOf(block.miner);
-            console.log("make previousValidatorIndex: " + previousValidatorIndex);
-        } else {
-            let blocksPassed = block.number - previousBlock;
-            console.log("blocksPassed: " + blocksPassed);
-            let expectedValidatorIndex = (previousValidatorIndex + blocksPassed) % validatorsArr.length;
-            console.log("!expValInd: " + expectedValidatorIndex);
-            let expectedValidator = validatorsArr[expectedValidatorIndex];
-            let isRightValidator = expectedValidator === block.miner;
-            console.log("expectedValidator: " + expectedValidator + ", actual: " + block.miner + ", isRightValidator: " + isRightValidator);
-            previousValidatorIndex += blocksPassed;
-            previousBlock = block.number;
-            if (!isRightValidator) {
-                result.passed = false;
-                result.missedValidators.push(expectedValidator);
-                result.error += "validator node missed round; ";
-                //validator missed the round, so next one mined
-                previousValidatorIndex += 1;
-            }
-        }
-        //check if there are txs
+        console.log("number: " + block.number + ", miner: " + block.miner);
         let actualBalanceIncrease = new BN(await web3.eth.getBalance(block.miner, block.number)).sub(new BN(await web3.eth.getBalance(block.miner, block.number - 1)));
         let expectedBalanceIncrease = new BN(config.miningReward);
-        console.log("reward: " + actualBalanceIncrease);
+        console.log("got reward: " + actualBalanceIncrease);
         console.log("config.miningReward: " + config.miningReward);
         let transactionsDetails = "";
+        //reward will be different if there are txs
         if (block.transactions.length > 0) {
-            transactionsDetails += "\nTransactions details:\nInitial reward: " + config.miningReward + "\n";
+            transactionsDetails += "\nTransactions details\n";
             for (let j = 0; j < block.transactions.length; j++) {
                 let receipt = await web3.eth.getTransactionReceipt(block.transactions[j]);
                 let transactionPrice = receipt.gasUsed * await(web3.eth.getGasPrice());

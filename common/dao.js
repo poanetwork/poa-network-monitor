@@ -15,8 +15,7 @@ const miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + miningReward
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
     " error TEXT," +
-    " wrongRewards TEXT," +
-    " missedValidators TEXT)";
+    " wrongRewards TEXT)";
 const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS missed_txs_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -44,7 +43,7 @@ function all(sql, params) {
 }
 
 let sqlDao = {
-    createMissingRoundsDb: function () {
+    createMissingRoundsTable: function () {
         run(missedRoundsTableCreateSql);
     },
 
@@ -62,7 +61,7 @@ let sqlDao = {
     },
 
     addToRewardTable: function (params) {
-        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, missedValidators, wrongRewards) VALUES ( ?, ?, ?, ?, ?)",
+        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, wrongRewards) VALUES ( ?, ?, ?, ?)",
             params);
     },
 
