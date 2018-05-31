@@ -27,7 +27,7 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             await sendSimpleAlert("Failed test: \n*" + missingRoundTest.description + "*");
             let runs = missingRoundTest.runs;
             for (let i = 0; i < runs.length; i++) {
-                let run = runs[0];
+                let run = runs[i];
                 if (!run.passed) {
                     let runsMessage = "Time: " + run.time + ",\nmissed validators: " + run.missedValidators + "\n";
                     await sendAttachment("", runsMessage, "");
@@ -40,7 +40,7 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             await sendSimpleAlert("Failed test: \n*" + miningRewardTest.description + "*");
             let runs = miningRewardTest.runs;
             for (let i = 0; i < runs.length; i++) {
-                let run = runs[0];
+                let run = runs[i];
                 if (!run.passed) {
                     let missedValidators = run.missedValidators.length > 0 ? (",\nmissed validators: " + run.missedValidators) : "";
                     let runsMessage = "Time: " + run.time + ",\nerror: " + run.error + missedValidators + "\n"
@@ -54,19 +54,12 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             await sendSimpleAlert("Failed test: \n*" + missingTxsTest.description + "*");
             let runs = missingTxsTest.runs;
             for (let i = 0; i < runs.length; i++) {
-                let run = runs[0];
+                let run = runs[i];
                 if (!run.passed) {
-                    let errorMessage = run.errorMessage ? (",\nerror: " + run.errorMessage) : "";
-                    let missedValidators = run.missedValidators.length > 0 ? (",\nmissed validators: " + run.missedValidators) : "";
-                    let runsMessage = "time: " + run.time + errorMessage + missedValidators;
-                    await sendAttachment("", runsMessage, "");
+                    let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs: " + run.validatorsMissedTxs) : "";
+                    let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
+                    await sendAttachment("", validatorsMissedTxs + failedTxs, "");
                     let txs = run.transactions;
-                    for (let i = 0; i < txs.length; i++) {
-                        if (txs[i].passed === false) {
-                            runsMessage = "Wrong tx at block: " + txs[i].number + ",\ntransactionHash: " + txs[i].transactionHash + ",\nerrorMessage: " + txs[i].errorMessage + "\n";
-                            await sendAttachment("", runsMessage, "");
-                        }
-                    }
                 }
             }
         }

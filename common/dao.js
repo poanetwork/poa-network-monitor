@@ -20,8 +20,8 @@ const miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + miningReward
 const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS missed_txs_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-    " transactions TEXT," +
-    " missedValidators TEXT)";
+    " validatorsMissedTxs TEXT," +
+    " failedTxs TEXT)";
 
 function run(sql, params) {
     db.serialize(function () {
@@ -67,7 +67,7 @@ let sqlDao = {
     },
 
     addToTxsTable: function (params) {
-        run("INSERT INTO " + missedTxsTableName + " (time, passed, transactions, missedValidators) VALUES ( ?, ?, ?, ?)",
+        run("INSERT INTO " + missedTxsTableName + " (time, passed, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?)",
             params);
     },
 

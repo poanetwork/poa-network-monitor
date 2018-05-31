@@ -5,45 +5,59 @@ const {
     BN,
     testHelper
 } = require('./test-helper.js');
-
 const {sqlDao} = require('../common/dao.js');
 
 sqlDao.createTxsTable();
 
+let validatorsMinedTx = {};
+//for saving validators who mined blocks with txs
+let validatorsMinedTxSet = new Set();
+
 checkSeriesOfTransactions(3)
     .then(result => {
-        console.log("done: ");
+        console.log("Checked ");
     })
     .catch(err => {
-        console.log("error: " + err);
+        console.log("Error in checkSeriesOfTransactions: " + err);
     });
 
 //periodically send a series of txs to check that all validator nodes are able to mine non-empty blocks
-async function checkSeriesOfTransactions(numberOfRounds) {
-    // todo: for few rounds
-    console.log("checkSeriesOfTransactions");
+async function checkSeriesOfTransactions(maxRounds) {
+   //will be saved as test result
+    let failedTxs = [];
+    let validatorsMissedTxs = [];
+    let passed = true;
     const validatorsArr = await testHelper.getValidators();
     console.log('got validators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
-    let blocksWithTransactions = [];
-    let transactionsPassed = true;
-
-    for (let i = 0; i < validatorsArr.length; i++) {
-        console.log("i: " + i);
-        let transactionResult = await checkMining(validatorsArr);
-        blocksWithTransactions.push(transactionResult);
-        if (!transactionResult.passed) {
-            transactionsPassed = false;
-            console.log("Transaction failed, error: " + transactionResult.errorMessage);
+    for (let round = 0; round < maxRounds; round++) {
+        console.log("checkSeriesOfTransactions round: " + round);
+        for (let i = 0; i < validatorsArr.length; i++) {
+            console.log("i: " + i);
+            let transactionResult = await checkMining(validatorsArr);
+            if (!transactionResult.passed) {
+                passed = false;
+                console.log("Transaction failed, error: " + transactionResult.errorMessage);
+                failedTxs.push(transactionResult);
+            }
+        }
+        console.log("validatorsSet size: " + validatorsMinedTxSet.size);
+        console.log("validatorsMinedTx: " + JSON.stringify(validatorsMinedTx));
+        if (validatorsMinedTxSet.size === validatorsArr.length) {
+            //all validators mined blocks with txs so no need to continue test
             break;
         }
     }
-    let result = testHelper.checkForMissedValidators(blocksWithTransactions, validatorsArr);
-    result.passed = transactionsPassed ? result.passed : false;
-    sqlDao.addToTxsTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(blocksWithTransactions), JSON.stringify(result.missedValidators)]);
-
-    console.log('result.passed ' + result.passed);
-    console.log('result.missedValidators ' + result.missedValidators);
-
+    if (validatorsMinedTxSet.size !== validatorsArr.length) {
+        passed = false;
+        for (let i = 0; i < validatorsArr.length; i++) {
+            if (!validatorsMinedTxSet.has(validatorsArr[i])) {
+                validatorsMissedTxs.push(validatorsArr[i]);
+            }
+        }
+    }
+    sqlDao.addToTxsTable([new Date(Date.now()).toLocaleString(), (passed) ? 1 : 0, JSON.stringify(validatorsMissedTxs), JSON.stringify(failedTxs)]);
+    console.log('passed: ' + passed + ', JSON.stringify(validatorsMissedTxs): '
+        + JSON.stringify(validatorsMissedTxs) + ', JSON.stringify(failedTxs): ' + JSON.stringify(failedTxs));
     //TODO save number of mined non-empty blocks for every validator
 }
 
@@ -107,6 +121,14 @@ async function checkMining(validatorsArr) {
     result.number = receipt.blockNumber;
     console.log("validatorExists: " + await validatorExists(block.miner, validatorsArr));
     result.miner = block.miner;
+    if (!validatorsMinedTxSet.has(result.miner)) {
+        validatorsMinedTxSet.add(result.miner);
+    }
+    if (validatorsMinedTx[result.miner]) {
+        validatorsMinedTx[result.miner] += 1;
+    } else {
+        validatorsMinedTx[result.miner] = 1;
+    }
     if (!(await validatorExists(block.miner, validatorsArr))) {
         result.passed = false;
         result.errorMessage = "Validator " + block.miner + " doesn't exist";

@@ -54,8 +54,8 @@ async function getTests(passed, fromTime) {
 
     if (txsRuns.length > 0) {
         txsRuns.map(function (tx) {
-            tx.transactions = JSON.parse(tx.transactions);
-            tx.missedValidators = JSON.parse(tx.missedValidators);
+            tx.validatorsMissedTxs = JSON.parse(tx.validatorsMissedTxs);
+            tx.failedTxs = JSON.parse(tx.failedTxs);
         });
         resultMissingTxs.runs = txsRuns;
     }
