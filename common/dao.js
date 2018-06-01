@@ -43,6 +43,17 @@ function all(sql, params) {
     })
 }
 
+function allWithTime(sql, lastSeconds) {
+    if (lastSeconds) {
+        let fromTime = new Date(Date.now() - lastSeconds * 1000).toLocaleString();
+        console.log("fromTime: " + fromTime);
+        return all(sql + " and time >= '" + fromTime + "'");
+    }
+    else {
+        return all(sql);
+    }
+}
+
 let sqlDao = {
     createMissingRoundsTable: function () {
         run(missedRoundsTableCreateSql);
@@ -71,62 +82,29 @@ let sqlDao = {
             params);
     },
 
-    getMissedRounds: async function (fromTime) {
-        console.log("getMissedRounds, fromTime: " + fromTime);
-        if (fromTime) {
-            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-            console.log("beginTime: " + beginTime);
-            return all("SELECT * FROM " + missedRoundsTableName + " where  time >= '" + beginTime + "'");
-        }
-        else {
-            return all("SELECT * FROM " + missedRoundsTableName);
-        }
+    getMissedRounds: async function (lastSeconds) {
+        console.log("getMissedRounds, lastSeconds: " + lastSeconds);
+        return allWithTime("SELECT * FROM " + missedRoundsTableName + " where 1 ", lastSeconds);
     },
 
-    getFailedMissedRounds: async function (fromTime) {
-        if (fromTime) {
-            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-            console.log("beginTime: " + beginTime);
-            return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0 and  time >= '" + beginTime + "'");
-        }
-        else {
-            return all("SELECT * FROM " + missedRoundsTableName + " where passed = 0");
-        }
+    getFailedMissedRounds: async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + missedRoundsTableName + " where passed = 0 ", lastSeconds);
     },
 
-    getRewards: async function (fromTime) {
-        if (fromTime) {
-            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-            return all("SELECT * FROM " + miningRewardTableName + " where  time >= '" + beginTime + "'");
-        }
-        else {
-            return all("SELECT * FROM " + miningRewardTableName);
-        }
+    getRewards: async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + miningRewardTableName + " where 1 ", lastSeconds);
     },
 
-    getFailedRewards: async function (fromTime) {
-        if (fromTime) {
-            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-            return all("SELECT * FROM " + miningRewardTableName + " where passed = 0 and  time >= '" + beginTime + "'");
-        }
-        else {
-            return all("SELECT * FROM " + miningRewardTableName + " where passed = 0");
-        }
+    getFailedRewards: async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + miningRewardTableName + " where passed = 0 ", lastSeconds);
     },
 
-    getMissedTxs: async function (fromTime) {
-        if (fromTime) {
-            let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-            return all("SELECT * FROM " + missedTxsTableName + " where  time >= '" + beginTime + "'");
-        }
-        else {
-            return all("SELECT * FROM " + missedTxsTableName);
-        }
+    getMissedTxs: async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + missedTxsTableName + " where 1 ", lastSeconds);
     },
 
-    getFailedMissedTxs: async function (fromTime) {
-        let beginTime = new Date(Date.now() - fromTime * 1000).toLocaleString();
-        return all("SELECT * FROM " + missedTxsTableName + " where passed = 0 and  time >= '" + beginTime + "'");
+    getFailedMissedTxs: async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + missedTxsTableName + " where passed = 0 ", lastSeconds);
     }
 };
 

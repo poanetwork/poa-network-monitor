@@ -15,7 +15,7 @@ slack = new Slack(config.slackWebHookUrl, {
     channel: "#monitor"
 });
 
-https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
+https.get('http://localhost:3000/api/failed?lastseconds=' + time, (resp) => {
     let data = '';
     resp.on('data', (chunk) => {
         data += chunk;
@@ -42,7 +42,7 @@ https.get('http://localhost:3000/api/failed?from=' + time, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + run.rewardDetails + "\ntransactions: " + run.transactions + "\n";
+                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + JSON.stringify(run.rewardDetails) + "\ntransactions: " +  JSON.stringify(run.transactions) + "\n";
                     await sendAttachment("", runsMessage, "");
                 }
             }

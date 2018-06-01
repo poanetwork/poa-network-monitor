@@ -8,20 +8,20 @@ function sendJson(result, response) {
 }
 
 app.get('/api/all', async function (request, response) {
-    let fromTime = getTime(request);
-    console.log("fromTime: " + fromTime);
-    let result = await getTests(true, fromTime);
+    let lastSeconds = getLastSeconds(request);
+    console.log("lastSeconds: " + lastSeconds);
+    let result = await getTests(true, lastSeconds);
     sendJson(result, response);
 });
 
 app.get('/api/failed', async function (request, response) {
-    let fromTime = getTime(request);
-    console.log("fromTime: " + fromTime);
-    let result = await getTests(false, fromTime);
+    let lastSeconds = getLastSeconds(request);
+    console.log("lastSeconds: " + lastSeconds);
+    let result = await getTests(false, lastSeconds);
     sendJson(result, response);
 });
 
-async function getTests(passed, fromTime) {
+async function getTests(passed, lastSeconds) {
     let resultMissingRounds = {description: "Check if any validator nodes are missing rounds", runs: []};
     let resultMissingTxs = {
         description: "Check that all validator nodes are able to mine non-empty blocks",
@@ -36,14 +36,14 @@ async function getTests(passed, fromTime) {
     let roundsRuns;
     let rewardsRuns;
     if (passed) {
-        txsRuns = await sqlDao.getMissedTxs(fromTime);
-        roundsRuns = await sqlDao.getMissedRounds(fromTime);
-        rewardsRuns = await sqlDao.getRewards(fromTime);
+        txsRuns = await sqlDao.getMissedTxs(lastSeconds);
+        roundsRuns = await sqlDao.getMissedRounds(lastSeconds);
+        rewardsRuns = await sqlDao.getRewards(lastSeconds);
     }
     else {
-        txsRuns = await sqlDao.getFailedMissedTxs(fromTime);
-        roundsRuns = await sqlDao.getFailedMissedRounds(fromTime);
-        rewardsRuns = await sqlDao.getFailedRewards(fromTime);
+        txsRuns = await sqlDao.getFailedMissedTxs(lastSeconds);
+        roundsRuns = await sqlDao.getFailedMissedRounds(lastSeconds);
+        rewardsRuns = await sqlDao.getFailedRewards(lastSeconds);
     }
 
     if (txsRuns.length > 0) {
@@ -82,8 +82,8 @@ function createTablesIfNotExist() {
     sqlDao.createTxsTable();
 }
 
-function getTime(request) {
-    let time = parseInt(request.query["from"]);
+function getLastSeconds(request) {
+    let time = parseInt(request.query["lastseconds"]);
     if (!(typeof time === 'number' && Math.sign(time) === 1)) {
         time = undefined;
     }
