@@ -75,7 +75,7 @@ async function checkBlocksRewards(blocks, validatorsArr) {
                 expectedReward: expectedBalanceIncrease,
                 actualReward: actualBalanceIncrease
             });
-            result.error += "Wrong reward, \n"  + "validator: " + block.miner +  "\nexpected: " + expectedBalanceIncrease + "\nactual:   " + actualBalanceIncrease +
+            result.error += "Wrong reward, \n"  + "validator: " + block.miner +  "\nexpected: " + expectedBalanceIncrease + "\nactual:      " + actualBalanceIncrease +
                 "\nblock: " + block.number + transactionsDetails + "; \n\n";
         }
     }

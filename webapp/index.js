@@ -8,20 +8,14 @@ function sendJson(result, response) {
 }
 
 app.get('/api/all', async function (request, response) {
-    let fromTime = request.query["from"];
-    if (!(Number.isInteger(fromTime) && fromTime > 0)) {
-        fromTime = undefined;
-    }
+    let fromTime = getTime(request);
     console.log("fromTime: " + fromTime);
     let result = await getTests(true, fromTime);
     sendJson(result, response);
 });
 
 app.get('/api/failed', async function (request, response) {
-    let fromTime = request.query["from"];
-    if (!(Number.isInteger(fromTime) && fromTime > 0)) {
-        fromTime = undefined;
-    }
+    let fromTime = getTime(request);
     console.log("fromTime: " + fromTime);
     let result = await getTests(false, fromTime);
     sendJson(result, response);
@@ -85,6 +79,14 @@ function createTablesIfNotExist() {
     sqlDao.createMissingRoundsTable();
     sqlDao.createRewardTable();
     sqlDao.createTxsTable();
+}
+
+function getTime(request) {
+    let time = parseInt(request.query["from"]);
+    if (!(typeof time === 'number' && Math.sign(time) === 1)) {
+        time = undefined;
+    }
+    return time;
 }
 
 app.listen(3000, function () {

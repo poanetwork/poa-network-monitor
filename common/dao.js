@@ -16,7 +16,7 @@ const miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + miningReward
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
     " error TEXT," +
     " wrongRewards TEXT)";
-const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS missed_txs_sokol (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + missedTxsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
     " validatorsMissedTxs TEXT," +

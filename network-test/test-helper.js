@@ -10,6 +10,10 @@ const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkCo
 const utils = require('web3-utils');
 const BN = require('bn.js');
 
+function getWeb3 (args) {
+    //todo
+}
+
 let testHelper = {
     /**
      * Obtains validators from the PoaNetworkConsensus contract
