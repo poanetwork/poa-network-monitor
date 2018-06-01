@@ -63,7 +63,8 @@ async function getTests(passed, fromTime) {
 
     if (rewardsRuns.length > 0) {
         rewardsRuns.map(function (run) {
-            run.wrongRewards = JSON.parse(run.wrongRewards);
+            run.rewardDetails = JSON.parse(run.rewardDetails);
+            run.transactions = JSON.parse(run.transactions);
         });
         resultMiningReward.runs = rewardsRuns;
     }

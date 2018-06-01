@@ -15,7 +15,8 @@ const miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + miningReward
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
     " error TEXT," +
-    " wrongRewards TEXT)";
+    " transactions TEXT," +
+    " rewardDetails TEXT)";
 const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + missedTxsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
     " time TEXT," +
     " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -61,7 +62,7 @@ let sqlDao = {
     },
 
     addToRewardTable: function (params) {
-        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, wrongRewards) VALUES ( ?, ?, ?, ?)",
+        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, rewardDetails, transactions) VALUES ( ?, ?, ?, ?, ?)",
             params);
     },
 
