@@ -49,22 +49,25 @@ async function checkBlocksRewards(block) {
     //reward will be different if there are txs
     for (let j = 0; j < block.transactions.length; j++) {
         let details = {hash: "", price: "", value: "", to: "", from: ""};
+        let gasPrice = await(web3.eth.getGasPrice());
         let receipt = await web3.eth.getTransactionReceipt(block.transactions[j]);
-        let transactionPrice = receipt.gasUsed * await(web3.eth.getGasPrice());
+        let transactionPrice = receipt.gasUsed * gasPrice;
         details.hash = receipt.transactionHash;
-        details.from = block.transactions[j].from;
-        details.to = block.transactions[j].to;
-        console.log("transactionPrice: " + transactionPrice);
-        if (!(block.transactions[j].from === block.miner)) {
+        details.from = receipt.from;
+        details.to = receipt.to;
+        details.gasPrice = gasPrice;
+        console.log("receipt.from: " + receipt.from);
+        console.log("receipt.to: " + receipt.to);
+        if (!(receipt.from === block.miner)) {
             expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(transactionPrice));
             details.price = transactionPrice;
         }
-        else if (block.transactions[j].from === block.miner) {
-            expectedBalanceIncrease = expectedBalanceIncrease.sub(new BN(block.transactions[j].value));
-            details.value = block.transactions[j].value;
+        else if (receipt.from === block.miner) {
+            expectedBalanceIncrease = expectedBalanceIncrease.sub(new BN(receipt.value));
+            details.value = receipt.value;
         }
-        else if (block.transactions[j].to === block.miner) {
-            expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(block.transactions[j].value));
+        else if (receipt.to === block.miner) {
+            expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(receipt.value));
         }
         console.log("transaction details: " + JSON.stringify(details));
         result.transactions.push(details);
