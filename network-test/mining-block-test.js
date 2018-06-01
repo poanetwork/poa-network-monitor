@@ -16,7 +16,7 @@ let validatorsMinedTx = {};
 //for saving validators who mined blocks with txs
 let validatorsMinedTxSet = new Set();
 
-checkSeriesOfTransactions(3)
+checkSeriesOfTransactions(config.maxRounds)
     .then(result => {
         console.log("Checked ");
     })

@@ -3,6 +3,9 @@ url = "http://localhost:8545"
 network = "sokol" # "core" for the main and "sokol" for the test network
 timeout = 500000
 
+# mining-block-test settings
+maxRounds = 5
+
 # Test accounts
 accountFromAddress = "0xbe....b"
 accountFromPassword = "q....a"

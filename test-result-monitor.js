@@ -58,9 +58,9 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs: " + run.validatorsMissedTxs) : "";
+                    let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs in " + config.maxRounds + " rounds: " + run.validatorsMissedTxs) : "";
                     let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
-                    await sendAttachment("", validatorsMissedTxs + failedTxs, "");
+                    await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, "");
                     let txs = run.transactions;
                 }
             }
@@ -78,7 +78,7 @@ function sendAttachment(messageTitle, messageValue, messageText) {
         attachments: [
             {
                 fallback: "Detected failed tests",
-                color: networkName === "core" ? "#4c0ba6" : "#965da7",
+                color: networkName === "core" ? "#4c0ba6" : "#ece86d",
                 fields: [
                     {
                         title: messageTitle,
