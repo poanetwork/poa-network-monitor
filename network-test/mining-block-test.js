@@ -1,11 +1,14 @@
 const {
     config,
-    web3,
+    getWeb3,
     utils,
     BN,
-    testHelper
+    testHelper,
+    getNetworkName
 } = require('./test-helper.js');
-const {sqlDao} = require('../common/dao.js');
+const {SqlDao} = require('../common/dao.js');
+const sqlDao = new SqlDao(getNetworkName());
+let web3 = getWeb3();
 
 sqlDao.createTxsTable();
 

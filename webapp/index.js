@@ -1,4 +1,5 @@
-const {sqlDao} = require('../common/dao.js');
+const {SqlDao} = require('../common/dao.js');
+let sqlDao;
 let express = require('express');
 let app = express();
 
@@ -7,14 +8,32 @@ function sendJson(result, response) {
     response.send(JSON.stringify(result));
 }
 
-app.get('/api/all', async function (request, response) {
+app.get('/sokol/api/all', async function (request, response) {
+    sqlDao = new SqlDao("sokol");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
     let result = await getTests(true, lastSeconds);
     sendJson(result, response);
 });
 
-app.get('/api/failed', async function (request, response) {
+app.get('/core/api/all', async function (request, response) {
+    sqlDao = new SqlDao("core");
+    let lastSeconds = getLastSeconds(request);
+    console.log("lastSeconds: " + lastSeconds);
+    let result = await getTests(true, lastSeconds);
+    sendJson(result, response);
+});
+
+app.get('/sokol/api/failed', async function (request, response) {
+    sqlDao = new SqlDao("sokol");
+    let lastSeconds = getLastSeconds(request);
+    console.log("lastSeconds: " + lastSeconds);
+    let result = await getTests(false, lastSeconds);
+    sendJson(result, response);
+});
+
+app.get('/core/api/failed', async function (request, response) {
+    sqlDao = new SqlDao("core");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
     let result = await getTests(false, lastSeconds);
@@ -77,6 +96,11 @@ async function getTests(passed, lastSeconds) {
 }
 
 function createTablesIfNotExist() {
+    createTablesForNetwork(new SqlDao("sokol"));
+    createTablesForNetwork(new SqlDao("core"));
+}
+
+function createTablesForNetwork(sqlDao) {
     sqlDao.createMissingRoundsTable();
     sqlDao.createRewardTable();
     sqlDao.createTxsTable();

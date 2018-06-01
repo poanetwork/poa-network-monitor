@@ -1,17 +1,27 @@
 const {
     config,
-    networkName
+    getNetworkName
 } = require('../common/config.js');
 const Web3 = require("web3");
-const web3 = new Web3(new Web3.providers.HttpProvider(config.url));
-const contracts = require("./contracts/" + networkName + "-contracts.js");
+let web3 = getWeb3();
+const contracts = require("./contracts/" + getNetworkName() + "-contracts.js");
 const testData = require("./test-data/blocks.js");
 const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkConsensusAbi, contracts.PoaNetworkConsensusAddress);
 const utils = require('web3-utils');
 const BN = require('bn.js');
 
-function getWeb3 (args) {
-    //todo
+function getWeb3() {
+    let url = "";
+    if (process.argv.length > 3) {
+        url = process.argv[3];
+        console.log("got url: " + url);
+    }
+    else {
+        console.log("process.argv.length: " + process.argv.length);
+        url = config.url;
+    }
+    console.log("getWeb3, url: " + url);
+    return new Web3(new Web3.providers.HttpProvider(url));
 }
 
 let testHelper = {
@@ -71,11 +81,11 @@ let testHelper = {
 
 module.exports = {
     config,
-    web3,
     testData,
     utils,
     BN,
     testHelper,
-    networkName
+    getNetworkName,
+    getWeb3
 };
 

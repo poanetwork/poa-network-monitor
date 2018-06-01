@@ -1,27 +1,82 @@
-const {
-    networkName
-} = require('./config.js');
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./poa_monitor.db');
+let db;
 
-const missedRoundsTableName = "missed_rounds_" + networkName;
-const miningRewardTableName = "mining_reward_" + networkName;
-const missedTxsTableName = "missed_txs_" + networkName;
-const missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-    " time TEXT," +
-    " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-    " missedValidators TEXT)";
-const miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + miningRewardTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-    " time TEXT," +
-    " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-    " error TEXT," +
-    " transactions TEXT," +
-    " rewardDetails TEXT)";
-const missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + missedTxsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-    " time TEXT," +
-    " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-    " validatorsMissedTxs TEXT," +
-    " failedTxs TEXT)";
+function SqlDao(networkName) {
+    this.networkName = networkName;
+    this.sqlite3 = require('sqlite3').verbose();
+    this.db = new this.sqlite3.Database('./poa_monitor.db');
+    db = this.db;
+    this.missedRoundsTableName = "missed_rounds_" + networkName;
+    this.miningRewardTableName = "mining_reward_" + networkName;
+    this.missedTxsTableName = "missed_txs_" + networkName;
+    this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " missedValidators TEXT)";
+    this.miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.miningRewardTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " error TEXT," +
+        " transactions TEXT," +
+        " rewardDetails TEXT)";
+    this.missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedTxsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " validatorsMissedTxs TEXT," +
+        " failedTxs TEXT)";
+
+    this.getMissedRounds = async function (lastSeconds) {
+        console.log("getMissedRounds, lastSeconds: " + lastSeconds);
+        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedMissedRounds = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.createMissingRoundsTable = function () {
+        run(this.missedRoundsTableCreateSql);
+    };
+
+    this.createRewardTable = function () {
+        run(this.miningRewardTableCreateSql);
+    };
+
+    this.createTxsTable = function () {
+        console.log("createTxsTable, his.missedTxsTableCreateSql: " + this.missedTxsTableCreateSql);
+        run(this.missedTxsTableCreateSql);
+    };
+
+    this.addToMissingRounds = function (params) {
+        run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
+            params);
+    };
+
+    this.addToRewardTable = function (params) {
+        run("INSERT INTO " + this.miningRewardTableName + " (time, passed, error, rewardDetails, transactions) VALUES ( ?, ?, ?, ?, ?)",
+            params);
+    };
+
+    this.addToTxsTable = function (params) {
+        run("INSERT INTO " + this.missedTxsTableName + " (time, passed, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?)",
+            params);
+    };
+
+    this.getRewards = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.miningRewardTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedRewards = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.miningRewardTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.getMissedTxs = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.missedTxsTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedMissedTxs = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.missedTxsTableName + " where passed = 0 ", lastSeconds);
+    };
+}
 
 function run(sql, params) {
     db.serialize(function () {
@@ -54,60 +109,6 @@ function allWithTime(sql, lastSeconds) {
     }
 }
 
-let sqlDao = {
-    createMissingRoundsTable: function () {
-        run(missedRoundsTableCreateSql);
-    },
-
-    createRewardTable: function () {
-        run(miningRewardTableCreateSql);
-    },
-
-    createTxsTable: function () {
-        run(missedTxsTableCreateSql);
-    },
-
-    addToMissingRounds: function (params) {
-        run("INSERT INTO " + missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
-            params);
-    },
-
-    addToRewardTable: function (params) {
-        run("INSERT INTO " + miningRewardTableName + " (time, passed, error, rewardDetails, transactions) VALUES ( ?, ?, ?, ?, ?)",
-            params);
-    },
-
-    addToTxsTable: function (params) {
-        run("INSERT INTO " + missedTxsTableName + " (time, passed, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?)",
-            params);
-    },
-
-    getMissedRounds: async function (lastSeconds) {
-        console.log("getMissedRounds, lastSeconds: " + lastSeconds);
-        return allWithTime("SELECT * FROM " + missedRoundsTableName + " where 1 ", lastSeconds);
-    },
-
-    getFailedMissedRounds: async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + missedRoundsTableName + " where passed = 0 ", lastSeconds);
-    },
-
-    getRewards: async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + miningRewardTableName + " where 1 ", lastSeconds);
-    },
-
-    getFailedRewards: async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + miningRewardTableName + " where passed = 0 ", lastSeconds);
-    },
-
-    getMissedTxs: async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + missedTxsTableName + " where 1 ", lastSeconds);
-    },
-
-    getFailedMissedTxs: async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + missedTxsTableName + " where passed = 0 ", lastSeconds);
-    }
-};
-
 module.exports = {
-    sqlDao,
+    SqlDao,
 };

@@ -1,12 +1,14 @@
 // check if payout script works properly for all nodes (check mining address balance)
 const {
     config,
-    web3,
+    getNetworkName,
+    getWeb3,
     BN,
     testHelper,
 } = require('./test-helper.js');
-
-const {sqlDao} = require('../common/dao.js');
+let web3 = getWeb3();
+const {SqlDao} = require('../common/dao.js');
+const sqlDao = new SqlDao(getNetworkName());
 
 sqlDao.createRewardTable();
 

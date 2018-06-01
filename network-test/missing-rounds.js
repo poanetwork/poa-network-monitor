@@ -1,10 +1,12 @@
 const {
-    web3,
+    getWeb3,
     testData,
     testHelper,
+    getNetworkName
 } = require('./test-helper.js');
-
-const {sqlDao} = require('../common/dao.js');
+let web3 = getWeb3();
+const {SqlDao} = require('../common/dao.js');
+const sqlDao = new SqlDao(getNetworkName());
 
 sqlDao.createMissingRoundsTable();
 

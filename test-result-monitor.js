@@ -1,6 +1,8 @@
 const {
-    config
+    config,
+    getNetworkName
 } = require('./common/config.js');
+const networkName = getNetworkName();
 const https = require('http');
 let time = 3600;
 process.argv.forEach(function (val, index, array) {
@@ -14,8 +16,9 @@ Slack = require('node-slackr');
 slack = new Slack(config.slackWebHookUrl, {
     channel: "#monitor"
 });
-
-https.get('http://localhost:3000/api/failed?lastseconds=' + time, (resp) => {
+let url = 'http://localhost:3000/' + networkName + '/api/failed?lastseconds=' + time;
+console.log("url: " + url);
+https.get(url, (resp) => {
     let data = '';
     resp.on('data', (chunk) => {
         data += chunk;
@@ -42,7 +45,7 @@ https.get('http://localhost:3000/api/failed?lastseconds=' + time, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + JSON.stringify(run.rewardDetails) + "\ntransactions: " +  JSON.stringify(run.transactions) + "\n";
+                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + JSON.stringify(run.rewardDetails) + "\ntransactions: " + JSON.stringify(run.transactions) + "\n";
                     await sendAttachment("", runsMessage, "");
                 }
             }
@@ -70,12 +73,12 @@ https.get('http://localhost:3000/api/failed?lastseconds=' + time, (resp) => {
 //todo color
 function sendAttachment(messageTitle, messageValue, messageText) {
     let messages = {
-        text: messageText,
+        text: networkName + ": " + messageText,
         channel: "#monitor",
         attachments: [
             {
                 fallback: "Detected failed tests",
-                color: "#4c0ba6",
+                color: networkName === "core" ? "#4c0ba6" : "#965da7",
                 fields: [
                     {
                         title: messageTitle,
@@ -100,7 +103,7 @@ function sendAttachment(messageTitle, messageValue, messageText) {
 
 function sendSimpleAlert(messageText) {
     let messages = {
-        text: messageText,
+        text: networkName + ": " + messageText,
         channel: "#monitor"
     };
     return new Promise((resolve, reject) => {
