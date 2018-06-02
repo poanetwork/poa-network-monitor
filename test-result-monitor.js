@@ -45,8 +45,8 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let rewardDetails = "\nvalidator: " + run.rewardDetails.validator + "\nblock: " + run.rewardDetails.block + "\gasUsed: " + run.rewardDetails.gasUsed +
-                        "\basicReward: " + run.rewardDetails.basicReward + "\nexpectedReward: " + run.rewardDetails.expectedReward +
+                    let rewardDetails = "\nvalidator: " + run.rewardDetails.validator + "\nblock: " + run.rewardDetails.block + "\ngasUsed: " + run.rewardDetails.gasUsed +
+                        "\nbasicReward: " + run.rewardDetails.basicReward + "\nexpectedReward: " + run.rewardDetails.expectedReward +
                     "\nactualReward: " + run.rewardDetails.actualReward + "\ntxsNumber: " + run.rewardDetails.txsNumber;
                     let transactions = "";
                     for (tx of run.transactions) {
@@ -112,7 +112,7 @@ function sendAttachment(messageTitle, messageValue, messageText) {
 
 function sendSimpleAlert(messageText) {
     let messages = {
-        text: networkName + ": " + messageText,
+        text: messageText,
         channel: "#monitor"
     };
     return new Promise((resolve, reject) => {
