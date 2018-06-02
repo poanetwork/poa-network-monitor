@@ -45,7 +45,14 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + JSON.stringify(run.rewardDetails) + "\ntransactions: " + JSON.stringify(run.transactions) + "\n";
+                    let rewardDetails = "\nvalidator: " + run.rewardDetails.validator + "\nblock: " + run.rewardDetails.block + "\gasUsed: " + run.rewardDetails.gasUsed +
+                        "\basicReward: " + run.rewardDetails.basicReward + "\nexpectedReward: " + run.rewardDetails.expectedReward +
+                    "\nactualReward: " + run.rewardDetails.actualReward + "\ntxsNumber: " + run.rewardDetails.txsNumber;
+
+                    let transactions = "\nhash: " + run.transactions.hash + "\n price: " + run.transactions.price + "\nvalue: " + run.transactions.value +
+                        "\ngasPrice: " + run.transactions.gasPrice + "\ngasUsed: " + run.transactions.gasUsed;
+
+                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + rewardDetails + "\ntransactions: " + transactions + "\n";
                     await sendAttachment("", runsMessage, "");
                 }
             }
@@ -58,6 +65,7 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
+
                     let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs in " + config.maxRounds + " rounds: " + run.validatorsMissedTxs) : "";
                     let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
                     await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, "");
