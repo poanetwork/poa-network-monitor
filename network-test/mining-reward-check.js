@@ -49,26 +49,27 @@ async function checkBlocksRewards(block) {
     //reward will be different if there are txs
     for (let j = 0; j < block.transactions.length; j++) {
         let details = {hash: "", price: "", value: "", to: "", from: ""};
-        let gasPrice = new BN(await(web3.eth.getGasPrice()));
+        let tx = await web3.eth.getTransaction(block.transactions[j]);
+        let gasPrice = new BN(tx.gasPrice);
         let receipt = await web3.eth.getTransactionReceipt(block.transactions[j]);
         let transactionPrice = new BN(receipt.gasUsed).mul(gasPrice);
         details.hash = receipt.transactionHash;
-        details.from = receipt.from;
-        details.to = receipt.to;
+        details.from = tx.from;
+        details.to = tx.to;
         details.gasPrice = gasPrice.toString();
         details.gasUsed = receipt.gasUsed;
-        console.log("receipt.from: " + receipt.from);
-        console.log("receipt.to: " + receipt.to);
-        if (!(receipt.from === block.miner)) {
+        console.log("receipt.from: " + tx.from);
+        console.log("receipt.to: " + tx.to);
+        if (!(tx.from === block.miner)) {
             expectedBalanceIncrease = expectedBalanceIncrease.add(transactionPrice);
             details.price = transactionPrice.toString();
         }
-        else if (receipt.from === block.miner) {
-            expectedBalanceIncrease = expectedBalanceIncrease.sub(new BN(receipt.value));
-            details.value = receipt.value;
+        else if (tx.from === block.miner) {
+            expectedBalanceIncrease = expectedBalanceIncrease.sub(new BN(tx.value));
+            details.value = tx.value;
         }
-        else if (receipt.to === block.miner) {
-            expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(receipt.value));
+        else if (tx.to === block.miner) {
+            expectedBalanceIncrease = expectedBalanceIncrease.add(new BN(tx.value));
         }
         console.log("transaction details: " + JSON.stringify(details));
         result.transactions.push(details);
