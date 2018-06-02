@@ -1,13 +1,69 @@
 # poa-network-test
 
-Tests for network health checks.
+Tests for network health checks and monitoring.
 <br>
 <ul>
-<li>config.toml file can be used for settings changing (network, test accounts, some test data)</li>
-<li>core-contracts.js and sokol-contracts.js - abi and address of needed contract (for each network)</li>
-<li>blocks.js - data for testing </li>
+<li><code>network-test</code> folder contains tests and helper script. 
+Use the command line arguments to detect network name and url. 
+If no command line arguments received, parameters from the toml file will be used. <br>
+<code>test-data</code> folder contains test blocks for checking missing-round test. <br>
+<code>contracts</code> folder contains abi and address of needed contract
+</li>
+<li><code>common</code> folder contains file with configuration information obtained from toml file and dao 
+for working with sqlite database.
+</li>
+<li><code>webapp</code> folder contains web server for retrieving test results
+</li>
+<li><code>test-result-monitor.js</code> file checks test results via web server and send alert to slack channel. 
+Also uses the command line arguments to detect network name and url</li>
+<li><code>config-sample.toml</code> is example of file with settings. Needs to be renamed to <code>config.toml</code> 
+and filled with valid settings (as account and password)  </li>
 </ul>
 <p>
-For running it's need to enable JSONRPC when connecting to POA Network on Parity<br>
-<code>parity --chain c:\path\to\spec.json --reserved-peers c:\path\to\bootnodes.txt --jsonrpc-apis all</code>
+<h4>Setup</h4>
+
+<h5>Run Parity nodes</h5>
+1. Install Parity and obtain spec.json and bootnodes.txt files using these instructions: <a href="https://github.com/poanetwork/wiki/wiki/POA-Installation">POA Installation</a>.<br>
+2. Clone Github Repository: <code>git clone https://github.com/Natalya11444/poa-network-monitor.git</code> <br>
+3. Run parity nodes <br>
+For running parity node it's need to enable JSONRPC when connecting to POA Network on Parity <code>--jsonrpc-apis all</code><br>
+For running two nodes for the each network it's need to specify different ports for them. <br><br>
+Example of running sokol node on ubuntu:<br>
+<code>nohup  parity --chain /path/to/sokol/spec.json --reserved-peers /path/to/sokol/bootnodes.txt --jsonrpc-apis all --port 30300 --jsonrpc-port 8540 --ws-port 8450 --ui-port 8180 --no-ipc > /path/to/logs/parity-sokol.log 2>&1 &</code>
+<br>url will be http://localhost:8540<br><br>
+For the core node:<br>
+<code>nohup  parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/bootnodes.txt --jsonrpc-apis all --port 30301 --jsonrpc-port 8541 --ws-port 8451 --ui-port 8181 --no-ipc > /path/to/logs/parity-core.log 2>&1 &</code>
+<br>url will be http://localhost:8541<br>
 </p>
+
+<p>
+<h5>Create scripts for running monitor and tests. </h5>
+<br>It's need to specify network name and url, otherwise it will be taken from the toml file. <br>
+Example for the one test: <br>
+<code>
+#!/bin/sh <br>
+cd /project/path/poa_monitor;  node  /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
+node  /project/path/poa_monitor/network-test/missing-rounds.js core http://localhost:8541 >> /path/to/logs/missing-rounds-core-log 2>&1;
+</code>
+<br>
+The same way scripts for other tests can be created <br><br>
+When running monitor the time in seconds can be specified for checking last result. <br>
+<code>#!/bin/sh <br>
+cd /project/path/poa_monitor;  node  /project/path/poa_monitor/test-result-monitor.js sokol http://localhost:8540 2400 >>/path/to/logs/monitor-sokol-log 2>&1;
+ node  /project/path/poa_monitor/test-result-monitor.js core http://localhost:8541 2400 >>/path/to/logs/monitor-core-log 2>&1
+</code>
+
+<br>
+</p>
+
+<h5>Add scripts to the crontab </h5>
+Run <code>sudo crontab -e -u user</code> <br>
+Crontab example: <br>
+<code>
+*/30 * * * * /path/to/scripts/missing-rounds.sh <br>
+*/30 * * * * /path/to/scripts/mining-reward.sh <br>
+*/30 * * * * /path/to/scripts/mining-block.sh <br>
+10 * * * *  /path/to/scripts/monitor.sh <br>
+</code>
+<h5>Run web server </h5>
+<code>nohup   node /project/path/poa_monitor/webapp/index.js >>/path/to/logs/web_server.log 2>&1  & </code>

@@ -48,10 +48,11 @@ https.get(url, (resp) => {
                     let rewardDetails = "\nvalidator: " + run.rewardDetails.validator + "\nblock: " + run.rewardDetails.block + "\gasUsed: " + run.rewardDetails.gasUsed +
                         "\basicReward: " + run.rewardDetails.basicReward + "\nexpectedReward: " + run.rewardDetails.expectedReward +
                     "\nactualReward: " + run.rewardDetails.actualReward + "\ntxsNumber: " + run.rewardDetails.txsNumber;
-
-                    let transactions = "\nhash: " + run.transactions.hash + "\n price: " + run.transactions.price + "\nvalue: " + run.transactions.value +
-                        "\ngasPrice: " + run.transactions.gasPrice + "\ngasUsed: " + run.transactions.gasUsed;
-
+                    let transactions = "";
+                    for (tx of run.transactions) {
+                        transactions += "\nHash: " + tx.hash + "\n price: " + tx.price + "\nvalue: " + tx.value +
+                            "\ngasPrice: " + tx.gasPrice + "\ngasUsed: " + tx.gasUsed + ";";
+                    }
                     let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + rewardDetails + "\ntransactions: " + transactions + "\n";
                     await sendAttachment("", runsMessage, "");
                 }
