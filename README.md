@@ -63,7 +63,6 @@ cd /project/path/poa_monitor;  node  /project/path/poa_monitor/network-test/miss
 node  /project/path/poa_monitor/network-test/missing-rounds.js core http://localhost:8541 >> /path/to/logs/missing-rounds-core-log 2>&1;
 ```
 
-<br>
 The same way scripts for other tests can be created <br><br>
 When running monitor the time in seconds can be specified for checking last result. <br>
 
@@ -75,7 +74,8 @@ node  /project/path/poa_monitor/test-result-monitor.js core http://localhost:854
 
 <h3>Add scripts to the crontab </h3>
 Run <code>sudo crontab -e -u user</code> <br>
-Crontab example: <br>
+Crontab example: 
+
 ```sh
 */30 * * * * /path/to/scripts/missing-rounds.sh 
 */30 * * * * /path/to/scripts/mining-reward.sh 
