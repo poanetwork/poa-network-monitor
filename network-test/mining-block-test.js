@@ -30,13 +30,26 @@ async function checkSeriesOfTransactions(maxRounds) {
     let failedTxs = [];
     let validatorsMissedTxs = [];
     let passed = true;
-    const validatorsArr = await testHelper.getValidators();
+    let validatorsArr;
+    try {
+         validatorsArr = await testHelper.getValidators();
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
+
     console.log('got validators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
     for (let round = 0; round < maxRounds; round++) {
         console.log("checkSeriesOfTransactions round: " + round);
         for (let i = 0; i < validatorsArr.length; i++) {
             console.log("i: " + i);
-            let transactionResult = await checkMining(validatorsArr);
+            let transactionResult;
+            try {
+                transactionResult = await checkMining(validatorsArr);
+            } catch (error) {
+                console.error(error);
+                return error;
+            }
             if (!transactionResult.passed) {
                 passed = false;
                 console.log("Transaction failed, error: " + transactionResult.errorMessage);
