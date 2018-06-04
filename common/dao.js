@@ -1,10 +1,7 @@
-let db;
+let sqlite3 = require('sqlite3').verbose();
+let db = new sqlite3.Database('./poa_monitor.db');
 
 function SqlDao(networkName) {
-    this.networkName = networkName;
-    this.sqlite3 = require('sqlite3').verbose();
-    this.db = new this.sqlite3.Database('./poa_monitor.db');
-    db = this.db;
     this.missedRoundsTableName = "missed_rounds_" + networkName;
     this.miningRewardTableName = "mining_reward_" + networkName;
     this.missedTxsTableName = "missed_txs_" + networkName;
