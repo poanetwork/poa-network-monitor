@@ -66,11 +66,22 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-
                     let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs in " + config.maxRounds + " rounds: " + run.validatorsMissedTxs) : "";
                     let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
                     await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, "");
-                    let txs = run.transactions;
+                }
+            }
+        }
+        let txsPublicRpcTest = JSON.parse(data).txsViaPublicRpcCheck;
+        if (txsPublicRpcTest.runs.length > 0) {
+            console.log("txsPublicRpcTest didn't pass: " + JSON.stringify(txsPublicRpcTest.runs));
+            await sendSimpleAlert("Failed test: \n*" + txsPublicRpcTest.description + "*");
+            let runs = txsPublicRpcTest.runs;
+            for (let i = 0; i < runs.length; i++) {
+                let run = runs[i];
+                if (!run.passed) {
+                    await sendAttachment("", "Time: " + run.time + "\nerror message: " +  run.errorMessage + "\ntransaction hash: " + run.transactionHash +
+                        "\nblock number: " + run.blockNumber + "\nminer: " + run.miner, "");
                 }
             }
         }
