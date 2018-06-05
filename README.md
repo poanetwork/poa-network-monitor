@@ -80,6 +80,7 @@ Crontab example:
 */30 * * * * /path/to/scripts/missing-rounds.sh 
 */30 * * * * /path/to/scripts/mining-reward.sh 
 */30 * * * * /path/to/scripts/mining-block.sh 
+*/30 * * * * /home/natadmin/scripts/txs-public-rpc.sh
 10 * * * *  /path/to/scripts/monitor.sh 
 ```
 <h3>Run web server </h3>

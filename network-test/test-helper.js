@@ -46,9 +46,11 @@ let testHelper = {
 
     checkTxReceipt: async function (web3, receipt, initialBalanceFrom, initialBalanceTo) {
         let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
+        let tx =  await web3.eth.getTransaction(receipt.transactionHash);
         let amountBN = new BN(config.amountToSend);
-        const finalBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
-        const finalBalanceTo = await web3.eth.getBalance(config.accountToAddress);
+        const finalBalanceFrom = await web3.eth.getBalance(tx.from);
+        console.log("initialBalanceFrom: " + initialBalanceFrom + ", finalBalanceFrom: " + finalBalanceFrom);
+        const finalBalanceTo = await web3.eth.getBalance(tx.to);
         console.log("transactionHash: " + receipt.transactionHash);
         result.transactionHash = receipt.transactionHash;
         if (receipt.transactionHash === undefined || receipt.transactionHash.length === 0) {
