@@ -5,6 +5,7 @@ function SqlDao(networkName) {
     this.missedRoundsTableName = "missed_rounds_" + networkName;
     this.miningRewardTableName = "mining_reward_" + networkName;
     this.missedTxsTableName = "missed_txs_" + networkName;
+    this.txsPublicRpcTableName = "txs_public_rpc_" + networkName;
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -20,6 +21,14 @@ function SqlDao(networkName) {
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
         " validatorsMissedTxs TEXT," +
         " failedTxs TEXT)";
+
+    this.txsPublicRpcTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.txsPublicRpcTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " errorMessage TEXT," +
+        " transactionHash TEXT," +
+        " blockNumber TEXT," +
+        " miner TEXT)";
 
     this.getMissedRounds = async function (lastSeconds) {
         console.log("getMissedRounds, lastSeconds: " + lastSeconds);
@@ -43,6 +52,11 @@ function SqlDao(networkName) {
         run(this.missedTxsTableCreateSql);
     };
 
+    this.createTxsPublicRpcTable = function () {
+        console.log("createTxsPublicRpcTable, sql: " + this.txsPublicRpcTableCreateSql);
+        run(this.txsPublicRpcTableCreateSql);
+    };
+
     this.addToMissingRounds = function (params) {
         run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
             params);
@@ -55,6 +69,11 @@ function SqlDao(networkName) {
 
     this.addToTxsTable = function (params) {
         run("INSERT INTO " + this.missedTxsTableName + " (time, passed, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?)",
+            params);
+    };
+
+    this.addToTxsPublicRpcTable = function (params) {
+        run("INSERT INTO " + this.txsPublicRpcTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
             params);
     };
 
@@ -72,6 +91,14 @@ function SqlDao(networkName) {
 
     this.getFailedMissedTxs = async function (lastSeconds) {
         return allWithTime("SELECT * FROM " + this.missedTxsTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.getTxsPublicRpc = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedTxsPublicRpc = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where passed = 0 ", lastSeconds);
     };
 }
 

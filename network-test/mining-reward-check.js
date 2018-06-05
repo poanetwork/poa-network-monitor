@@ -17,7 +17,7 @@ sqlDao.createRewardTable();
  */
 async function checkMiningReward() {
     console.log("checkMiningReward");
-    const validatorsArr = await testHelper.getValidators();
+    const validatorsArr = await testHelper.getValidators(web3);
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     for (let i = 0; i < blocksToTest.length; i++) {
         let result = await checkBlocksRewards(blocksToTest[i]);

@@ -50,19 +50,26 @@ async function getTests(passed, lastSeconds) {
         description: "Check if payout script works properly for all nodes (check mining address balance)",
         runs: []
     };
+    let resultTxsPublicRpc = {
+        description: "Periodically send txs via public rpc endpoint",
+        runs: []
+    };
 
     let txsRuns;
     let roundsRuns;
     let rewardsRuns;
+    let txsPublicRpcRuns;
     if (passed) {
         txsRuns = await sqlDao.getMissedTxs(lastSeconds);
         roundsRuns = await sqlDao.getMissedRounds(lastSeconds);
         rewardsRuns = await sqlDao.getRewards(lastSeconds);
+        txsPublicRpcRuns = await sqlDao.getTxsPublicRpc(lastSeconds);
     }
     else {
         txsRuns = await sqlDao.getFailedMissedTxs(lastSeconds);
         roundsRuns = await sqlDao.getFailedMissedRounds(lastSeconds);
         rewardsRuns = await sqlDao.getFailedRewards(lastSeconds);
+        txsPublicRpcRuns = await sqlDao.getFailedTxsPublicRpc(lastSeconds);
     }
 
     if (txsRuns.length > 0) {
@@ -87,11 +94,16 @@ async function getTests(passed, lastSeconds) {
         });
         resultMiningReward.runs = rewardsRuns;
     }
+    if (txsPublicRpcRuns.length > 0) {
+        resultTxsPublicRpc.runs = txsPublicRpcRuns;
+    }
+
 
     return {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
-        miningRewardCheck: resultMiningReward
+        miningRewardCheck: resultMiningReward,
+        txsViaPublicRpcCheck: resultTxsPublicRpc
     };
 }
 
@@ -104,6 +116,7 @@ function createTablesForNetwork(sqlDao) {
     sqlDao.createMissingRoundsTable();
     sqlDao.createRewardTable();
     sqlDao.createTxsTable();
+    sqlDao.createTxsPublicRpcTable();
 }
 
 function getLastSeconds(request) {

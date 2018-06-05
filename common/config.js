@@ -1,6 +1,7 @@
 const fs = require('fs');
 const toml = require('toml');
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf-8'));
+let keyStore = fs.readFileSync(config.keyStorePath);
 
 function getNetworkName() {
     let network = "";
@@ -25,6 +26,7 @@ function getNetworkName() {
 
 module.exports = {
     config,
-    getNetworkName
+    getNetworkName,
+    keyStore
 };
 

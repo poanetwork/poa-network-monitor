@@ -15,7 +15,7 @@ sqlDao.createMissingRoundsTable();
  */
 async function checkMissingValidators() {
     console.log("checkMissingValidators");
-    const validatorsArr = await testHelper.getValidators();
+    const validatorsArr = await testHelper.getValidators(web3);
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = testHelper.checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
