@@ -27,7 +27,7 @@ async function sendTxsViaPublicRpc(networkName, url, txsNumber) {
     web3 = new Web3(new Web3.providers.HttpProvider(url));
     let decryptedAccount = getDecryptedAccount();
     for (let i = 0; i < txsNumber; i++) {
-        let initialBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
+        let initialBalanceFrom = await web3.eth.getBalance(decryptedAccount.address);
         let initialBalanceTo = await web3.eth.getBalance(config.accountToAddress);
         let txReceipt = await sendRawTx(decryptedAccount, config.accountToAddress, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
         let transactionResult;
