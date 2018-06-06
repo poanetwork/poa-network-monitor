@@ -28,7 +28,7 @@ function getWeb3(isWebsocket) {
 }
 
 function getDecryptedAccount() {
-    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(keyStore), config.accountFromPassword);
+    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(keyStore), config.passwordFromPublicRpcTest);
     console.log('decryptedAccount.address: ' + decryptedAccount.address);
     return decryptedAccount;
 }
@@ -82,7 +82,7 @@ let testHelper = {
         result.miner = block.miner;
         if (!(await this.validatorExists(block.miner, validatorsArr))) {
             result.passed = false;
-            result.errorMessage = "Validator " + block.miner + " doesn't exist";
+            result.errorMessage += "Validator " + block.miner + " doesn't exist";
             console.log("validator " + block.miner + " doesn't exist");
         }
         return result;

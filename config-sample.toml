@@ -7,10 +7,15 @@ timeout = 500000
 maxRounds = 5
 
 # Test accounts
-accountFromAddress = "0xbe....b"
-accountFromPassword = "q....a"
-accountToAddress = "0x43....72"
-accountToPassword = ""
+addressFromTxTest = "0x...dfcb"
+passwordFromTxTest = "password"
+addressToTxTest = "0x...a72"
+passwordToTxTest = "password"
+
+addressFromPublicRpcTest = "0x...cb"
+passwordFromPublicRpcTest = "password"
+addressToPublicRpcTest = "0x....2"
+passwordToPublicRpcTest = "password"
 
 # Transaction settings
 gasPrice = "1000000000"

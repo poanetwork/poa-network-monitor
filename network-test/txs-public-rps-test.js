@@ -29,8 +29,8 @@ async function sendTxsViaPublicRpc(networkName, url, txsNumber) {
     let decryptedAccount = getDecryptedAccount();
     for (let i = 0; i < txsNumber; i++) {
         let initialBalanceFrom = await web3.eth.getBalance(decryptedAccount.address);
-        let initialBalanceTo = await web3.eth.getBalance(config.accountToAddress);
-        let txReceipt = await sendRawTx(decryptedAccount, config.accountToAddress, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
+        let initialBalanceTo = await web3.eth.getBalance(config.addressToPublicRpcTest);
+        let txReceipt = await sendRawTx(decryptedAccount, config.addressToPublicRpcTest, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
         let transactionResult;
         try {
             transactionResult = await testHelper.checkTxReceipt(web3, txReceipt, initialBalanceFrom, initialBalanceTo);
@@ -50,7 +50,7 @@ async function sendRawTx(decryptedAccount, to, value, gas, gasPrice) {
     console.log("nonce: " + nonce);
     let rawTransaction = {
         "from": decryptedAccount.address,
-        "to": config.accountToAddress,
+        "to": config.addressToPublicRpcTest,
         "value": utils.toHex(value),
         "gas": utils.toHex(gas),
         "gasPrice": utils.toHex(gasPrice),

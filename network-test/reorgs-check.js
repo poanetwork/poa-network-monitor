@@ -24,17 +24,20 @@ async function checkForReorgs() {
         if (error)
             console.log("subscription error: " + error);
     })
-        .on("data", function (blockHeader) {
+        .on("data", async function (blockHeader) {
             console.log("new block: " + blockHeader.number);
             console.log("hash: " + blockHeader.hash);
             console.log("parentHash: " + blockHeader.parentHash);
-            if (blockHeader.number !== prevBlockNum + 1) {
-                console.log("different block number: " + " prevBlockNum: " + prevBlockNum + ", blockHeader.number: " + blockHeader.number);
+            if (prevBlockNum) {
+                if (blockHeader.number !== prevBlockNum + 1) {
+                    console.log("unexpected block number: " + " prevBlockNum: " + prevBlockNum + ", blockHeader.number: " + blockHeader.number);
+                }
+                if (blockHeader.parentHash !== prevHash) {
+                    console.log("!!! Reorgs: " + ", prevHash: " + prevHash + ", blockHeader.parentHash: " + blockHeader.parentHash);
+                    //todo check from what block by parentHash
+                }
             }
             prevBlockNum = blockHeader.number;
-            if (blockHeader.parentHash !== prevHash) {
-                console.log("!!! Reorgs: " + ", prevHash: " + prevHash + ", blockHeader.parentHash: " + blockHeader.parentHash);
-            }
             prevHash = blockHeader.hash;
             console.log("_____");
         });

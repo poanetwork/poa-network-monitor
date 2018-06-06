@@ -79,17 +79,17 @@ Sends transaction, checks it was confirmed and balance changed properly
  */
 async function checkTxSending(validatorsArr) {
     console.log("checkTxSending()");
-    await web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
-    console.log("config.accountFromAddress: " + config.accountFromAddress);
-    let initialBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
+    await web3.eth.personal.unlockAccount(config.addressFromTxTest, config.passwordFromTxTest);
+    console.log("config.addressFromTxTest: " + config.addressFromTxTest);
+    let initialBalanceFrom = await web3.eth.getBalance(config.addressFromTxTest);
     console.log("initialBalanceFrom: " + initialBalanceFrom);
-    let initialBalanceTo = await web3.eth.getBalance(config.accountToAddress);
+    let initialBalanceTo = await web3.eth.getBalance(config.addressToTxTest);
     let receipt;
     try {
         receipt = await sendTransaction({
-            to: config.accountToAddress,
+            to: config.addressToTxTest,
             value: config.amountToSend,
-            from: config.accountFromAddress,
+            from: config.addressFromTxTest,
             gasPrice: config.gasPrice
         });
     } catch (error) {
