@@ -22,6 +22,7 @@ sendTxsViaPublicRpc("sokol", "https://sokol.poa.network", config.txsNumber)
 
 // periodically send txs via public rpc endpoint
 async function sendTxsViaPublicRpc(networkName, url, txsNumber) {
+    //todo different account
     sqlDao = new SqlDao(networkName);
     sqlDao.createTxsPublicRpcTable();
     web3 = new Web3(new Web3.providers.HttpProvider(url));

@@ -10,7 +10,7 @@ const testData = require("./test-data/blocks.js");
 const utils = require('web3-utils');
 const BN = require('bn.js');
 
-function getWeb3() {
+function getWeb3(isWebsocket) {
     let url = "";
     if (process.argv.length > 3) {
         url = process.argv[3];
@@ -21,6 +21,9 @@ function getWeb3() {
         url = config.url;
     }
     console.log("getWeb3, url: " + url);
+    if (isWebsocket) {
+        return new Web3(new Web3.providers.WebsocketProvider(url));
+    }
     return new Web3(new Web3.providers.HttpProvider(url));
 }
 
@@ -38,7 +41,7 @@ let testHelper = {
     getValidators: async function (web3) {
         // todo check if not empty
         const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkConsensusAbi, contracts.PoaNetworkConsensusAddress);
-       let validatorsArr = await
+        let validatorsArr = await
             PoaNetworkConsensusContract.methods.getValidators().call();
         console.log('getValidators() ');
         return validatorsArr;
@@ -46,7 +49,7 @@ let testHelper = {
 
     checkTxReceipt: async function (web3, receipt, initialBalanceFrom, initialBalanceTo) {
         let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
-        let tx =  await web3.eth.getTransaction(receipt.transactionHash);
+        let tx = await web3.eth.getTransaction(receipt.transactionHash);
         let amountBN = new BN(config.amountToSend);
         const finalBalanceFrom = await web3.eth.getBalance(tx.from);
         console.log("initialBalanceFrom: " + initialBalanceFrom + ", finalBalanceFrom: " + finalBalanceFrom);

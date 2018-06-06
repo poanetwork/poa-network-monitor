@@ -29,6 +29,7 @@ async function checkMiningReward() {
 
 }
 
+//todo check error for all tests
 checkMiningReward();
 
 /**

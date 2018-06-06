@@ -23,7 +23,7 @@ checkSeriesOfTransactions(config.maxRounds)
 
 //periodically send a series of txs to check that all validator nodes are able to mine non-empty blocks
 async function checkSeriesOfTransactions(maxRounds) {
-   //will be saved as test result
+    //will be saved as test result
     let failedTxs = [];
     let validatorsMissedTxs = [];
     let passed = true;
@@ -40,6 +40,7 @@ async function checkSeriesOfTransactions(maxRounds) {
         for (let i = 0; i < validatorsArr.length; i++) {
             console.log("i: " + i);
             let transactionResult;
+            // todo from account 1 to 2 and backward
             try {
                 transactionResult = await checkTxSending(validatorsArr);
             } catch (error) {
@@ -79,14 +80,22 @@ Sends transaction, checks it was confirmed and balance changed properly
 async function checkTxSending(validatorsArr) {
     console.log("checkTxSending()");
     await web3.eth.personal.unlockAccount(config.accountFromAddress, config.accountFromPassword);
+    console.log("config.accountFromAddress: " + config.accountFromAddress);
     let initialBalanceFrom = await web3.eth.getBalance(config.accountFromAddress);
+    console.log("initialBalanceFrom: " + initialBalanceFrom);
     let initialBalanceTo = await web3.eth.getBalance(config.accountToAddress);
-    const receipt = await sendTransaction({
-        to: config.accountToAddress,
-        value: config.amountToSend,
-        from: config.accountFromAddress,
-        gasPrice: config.gasPrice
-    });
+    let receipt;
+    try {
+        receipt = await sendTransaction({
+            to: config.accountToAddress,
+            value: config.amountToSend,
+            from: config.accountFromAddress,
+            gasPrice: config.gasPrice
+        });
+    } catch (error) {
+        console.error("error in sendTransaction: " + error);
+        return error;
+    }
     await checkWhoMinedTxs(receipt);
     let txResult = await testHelper.checkTxReceipt(web3, receipt, initialBalanceFrom, initialBalanceTo);
     console.log("txResult: " + JSON.stringify(txResult));
@@ -94,7 +103,9 @@ async function checkTxSending(validatorsArr) {
 }
 
 async function checkWhoMinedTxs(receipt) {
+    console.log("checkWhoMinedTxs ");
     const block = await web3.eth.getBlock(receipt.blockNumber);
+    console.log("receipt.blockNumber: " + receipt.blockNumber);
     if (!validatorsMinedTxSet.has(block.miner)) {
         validatorsMinedTxSet.add(block.miner);
     }
