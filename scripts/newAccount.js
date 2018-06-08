@@ -1,6 +1,8 @@
 const {
-    web3,
+    getWeb3,
 } = require('../network-test/test-helper.js');
+
+const web3 = getWeb3();
 
 function createAccount() {
     console.log("createAccount");

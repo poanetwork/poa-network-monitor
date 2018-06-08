@@ -33,7 +33,7 @@ https.get(url, (resp) => {
                 let run = runs[i];
                 if (!run.passed) {
                     let runsMessage = "Time: " + run.time + ",\nmissed validators: " + run.missedValidators + "\n";
-                    await sendAttachment("", runsMessage, "");
+                    await sendAttachment("", runsMessage, true);
                 }
             }
         }
@@ -47,14 +47,14 @@ https.get(url, (resp) => {
                 if (!run.passed) {
                     let rewardDetails = "\nvalidator: " + run.rewardDetails.validator + "\nblock: " + run.rewardDetails.block + "\ngasUsed: " + run.rewardDetails.gasUsed +
                         "\nbasicReward: " + run.rewardDetails.basicReward + "\nexpectedReward: " + run.rewardDetails.expectedReward +
-                    "\nactualReward: " + run.rewardDetails.actualReward + "\ntxsNumber: " + run.rewardDetails.txsNumber;
+                        "\nactualReward: " + run.rewardDetails.actualReward + "\ntxsNumber: " + run.rewardDetails.txsNumber;
                     let transactions = "";
                     for (tx of run.transactions) {
                         transactions += "\nHash: " + tx.hash + "\n price: " + tx.price + "\nvalue: " + tx.value +
                             "\ngasPrice: " + tx.gasPrice + "\ngasUsed: " + tx.gasUsed + ";";
                     }
                     let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nreward details: " + rewardDetails + "\ntransactions: " + transactions + "\n";
-                    await sendAttachment("", runsMessage, "");
+                    await sendAttachment("", runsMessage, true);
                 }
             }
         }
@@ -68,7 +68,7 @@ https.get(url, (resp) => {
                 if (!run.passed) {
                     let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs in " + config.maxRounds + " rounds: " + run.validatorsMissedTxs) : "";
                     let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
-                    await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, "");
+                    await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, true);
                 }
             }
         }
@@ -80,8 +80,35 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    await sendAttachment("", "Time: " + run.time + "\nerror message: " +  run.errorMessage + "\ntransaction hash: " + run.transactionHash +
-                        "\nblock number: " + run.blockNumber + "\nminer: " + run.miner, "");
+                    await sendAttachment("", "Time: " + run.time + "\nerror message: " + run.errorMessage + "\ntransaction hash: " + run.transactionHash +
+                        "\nblock number: " + run.blockNumber + "\nminer: " + run.miner, true);
+                }
+            }
+        }
+
+
+        let reorgsCheckTest = JSON.parse(data).reorgsCheck;
+        if (reorgsCheckTest.reorgs.length > 0) {
+            //console.log("reorgsCheckTest : " + JSON.stringify(reorgsCheckTest.reorgs));
+            //await sendSimpleAlert("*Reorgs:* \n");
+            let reorgs = reorgsCheckTest.reorgs;
+
+            console.log("reorgs.length: " + reorgs.length);
+            for (let i = 0; i < reorgs.length; i++) {
+                console.log("i: " + i);
+                let reorg = reorgs[i];
+                let blocks = reorg.changedBlocks;
+                console.log("blocks.length: " + blocks.length);
+                if (blocks.length > 0) {
+                    await sendAttachment("Reorgs", "Time: " + reorg.time + "\nto block: " + reorg.toBlock + "\n ", true);
+                    for (let j = 0; j < blocks.length; j++) {
+                        let blocksMessage = "";
+                        console.log("j: " + j);
+                        let changedBlock = blocks[j];
+                        blocksMessage += "\n*Excluded block:*\nnumber: " + changedBlock.excluded.number + "\nhash: " + changedBlock.excluded.hash + "\nminer: " + changedBlock.excluded.miner +
+                            "\n\n*Accepted block:*\nnumber: " + changedBlock.accepted.number + "\nhash: " + changedBlock.accepted.hash + "\nminer: " + changedBlock.accepted.miner;
+                        await sendAttachment("", blocksMessage, false);
+                    }
                 }
             }
         }
@@ -91,9 +118,9 @@ https.get(url, (resp) => {
 });
 
 //todo color
-function sendAttachment(messageTitle, messageValue, messageText) {
+function sendAttachment(messageTitle, messageValue, includeNetworkName) {
     let messages = {
-        text: networkName + ": " + messageText,
+        text: includeNetworkName ? networkName : "",
         channel: "#monitor",
         attachments: [
             {

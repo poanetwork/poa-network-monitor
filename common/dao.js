@@ -6,6 +6,7 @@ function SqlDao(networkName) {
     this.miningRewardTableName = "mining_reward_" + networkName;
     this.missedTxsTableName = "missed_txs_" + networkName;
     this.txsPublicRpcTableName = "txs_public_rpc_" + networkName;
+    this.reorgsTableName = "reorgs_" + networkName;
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -29,6 +30,11 @@ function SqlDao(networkName) {
         " transactionHash TEXT," +
         " blockNumber TEXT," +
         " miner TEXT)";
+
+    this.reorgsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.reorgsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " toBlock TEXT," +
+        " changedBlocks TEXT)";
 
     this.getMissedRounds = async function (lastSeconds) {
         console.log("getMissedRounds, lastSeconds: " + lastSeconds);
@@ -57,6 +63,15 @@ function SqlDao(networkName) {
         run(this.txsPublicRpcTableCreateSql);
     };
 
+    this.createReorgsTable = function () {
+        console.log("createReorgsTable, sql: " + this.reorgsTableCreateSql);
+        run(this.reorgsTableCreateSql);
+    };
+    // this.reorgsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.reorgsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+    //     " time TEXT," +
+    //     " to TEXT," +
+    //     " changedBlocks TEXT)";
+
     this.addToMissingRounds = function (params) {
         run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
             params);
@@ -75,6 +90,20 @@ function SqlDao(networkName) {
     this.addToTxsPublicRpcTable = function (params) {
         run("INSERT INTO " + this.txsPublicRpcTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
             params);
+    };
+
+    this.addToReorgsTable = function (params) {
+        run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
+            params);
+    };
+
+    // this.reorgsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.reorgsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+    //     " time TEXT," +
+    //     " to TEXT," +
+    //     " changedBlocks TEXT)";
+
+    this.getReorgs = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.reorgsTableName + " where 1 ", lastSeconds);
     };
 
     this.getRewards = async function (lastSeconds) {

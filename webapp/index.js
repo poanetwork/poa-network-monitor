@@ -55,10 +55,23 @@ async function getTests(passed, lastSeconds) {
         runs: []
     };
 
+    let resultReorgs = {
+        description: "Check for reorgs",
+        reorgs: []
+    };
+
     let txsRuns;
     let roundsRuns;
     let rewardsRuns;
     let txsPublicRpcRuns;
+    let reorgs;
+    reorgs = await sqlDao.getReorgs(lastSeconds);
+    if (reorgs.length > 0) {
+        reorgs.map(function (reorg) {
+            reorg.changedBlocks = JSON.parse(reorg.changedBlocks);
+        });
+        resultReorgs.reorgs = reorgs;
+    }
     if (passed) {
         txsRuns = await sqlDao.getMissedTxs(lastSeconds);
         roundsRuns = await sqlDao.getMissedRounds(lastSeconds);
@@ -103,7 +116,8 @@ async function getTests(passed, lastSeconds) {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
         miningRewardCheck: resultMiningReward,
-        txsViaPublicRpcCheck: resultTxsPublicRpc
+        txsViaPublicRpcCheck: resultTxsPublicRpc,
+        reorgsCheck: resultReorgs
     };
 }
 
@@ -117,6 +131,7 @@ function createTablesForNetwork(sqlDao) {
     sqlDao.createRewardTable();
     sqlDao.createTxsTable();
     sqlDao.createTxsPublicRpcTable();
+    sqlDao.createReorgsTable();
 }
 
 function getLastSeconds(request) {
