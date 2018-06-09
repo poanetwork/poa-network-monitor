@@ -32,18 +32,18 @@ function checkIsSynced(from) {
     }
 }
 
-async function checkPreviousHashes(to) {
-    let reorg = {to: "", changedBlocks: []};
-    reorg.to = to;
+async function checkPreviousHashesAndSave(to) {
+    let reorgToSave = {to: "", changedBlocks: []};
+    reorgToSave.to = to;
     console.log("checkPreviousHashes() to: " + to + " from: " + firstBlock);
     let blocksToCheck = JSON.parse(JSON.stringify(blocks));
     let from = firstBlock;
     for (let i = to; i >= from; i--) {
         console.log("i: " + i);
         let ethBlock = await web3.eth.getBlock(i);
-        if (blocksToCheck[i].hash !== ethBlock.hash) {
+        if (blocksToCheck[i] && blocksToCheck[i].hash !== ethBlock.hash) {
             let changedBlock = {excluded: blocksToCheck[i], accepted: ethBlock};
-            reorg.changedBlocks.push(changedBlock);
+            reorgToSave.changedBlocks.push(changedBlock);
             console.log("-- reorg " + i + ", from " + blocksToCheck[i].hash + " to " + ethBlock.hash);
             if (blocks[i]) {
                 blocks[i] = ethBlock;
@@ -53,7 +53,8 @@ async function checkPreviousHashes(to) {
             console.log("hashes are equal");
         }
     }
-    saveReorgs(reorg);
+    saveReorgs(reorgToSave);
+    reorg = undefined;
 }
 
 function addNextBlock(block) {
@@ -73,7 +74,6 @@ function removeFirst() {
     console.log("removed first, firstBlock: " + firstBlock + ", lastBlock: " + lastBlock);
 }
 
-//todo for core, saving results
 checkForReorgs()
     .then(result => {
         console.log("checkForReorgs done ");
@@ -90,6 +90,59 @@ function saveReorgs(reorg) {
     else {
         console.log("no changed blocks");
     }
+}
+
+function gotReplacement(blockHeader) {
+    console.log("gotReplacement() ");
+    //if it's first received block in reorgs
+    if (!reorg) {
+        reorg = {to: lastBlock, changedBlocks: []};
+        reorgToNumber = lastBlock;
+        console.log("reorgToNumber: " + reorgToNumber);
+    }
+    console.log("-- reorg " + blockHeader.number);
+    let changedBlock = {excluded: blocks[blockHeader.number], accepted: blockHeader};
+    // save changed block, wait until receiving all changed blocks, then save reorg
+    reorg.changedBlocks.push(changedBlock);
+    if (!blocks[blockHeader.number]) {
+        removeFirst();
+    }
+    blocks[blockHeader.number] = blockHeader;
+}
+
+function gotNextBlock(blockHeader) {
+    console.log("gotNextBlock() ");
+    if (reorg) {
+        if (checkIsSynced(reorgToNumber)) {
+            //save reorged blocks after all changed blocks are received
+            console.log("finished reorg: " + blockHeader.number);
+            reorgToNumber = -1;
+            saveReorgs(reorg);
+            reorg = undefined;
+        }
+    } else {
+        // previous blocks are changed 
+        if (blocks[lastBlock] && blockHeader.parentHash !== blocks[lastBlock].hash) {
+            reorgToNumber = lastBlock;
+            checkPreviousHashesAndSave(reorgToNumber);
+        }
+    }
+    addNextBlock(blockHeader);
+}
+
+function gotHigherBlockNumber(blockHeader) {
+    console.log("gotHigherBlockNumber() ");
+    if (!reorg) {
+        reorg = {to: lastBlock, changedBlocks: []};
+        reorgToNumber = lastBlock;
+        console.log("reorgToNumber: " + reorgToNumber);
+    }
+    console.log("got higher number then expected: " + blockHeader.number + " instead of " + lastBlock);
+    checkPreviousHashesAndSave(reorgToNumber);
+    blocks[blockHeader.number] = blockHeader;
+    console.log("add: " + blockHeader.number);
+    lastBlock = blockHeader.number;
+    removeFirst();
 }
 
 async function checkForReorgs() {
@@ -111,47 +164,14 @@ async function checkForReorgs() {
                 console.log("add first block: " + blockHeader.number);
             }
             else {
-                if (blocks[blockHeader.number]) {
-                    if (!reorg) {
-                        reorg = {to: lastBlock, changedBlocks: []};
-                        reorgToNumber = lastBlock;
-                        console.log("reorgToNumber: " + reorgToNumber);
-                    }
-                    console.log("-- reorg " + blockHeader.number + ", from " + blocks[blockHeader.number].hash + " to " + blockHeader.hash);
-                    let changedBlock = {excluded: blocks[blockHeader.number], accepted: blockHeader};
-                    reorg.changedBlocks.push(changedBlock);
-                    blocks[blockHeader.number] = blockHeader;
+                if (blockHeader.number <= lastBlock) {
+                    gotReplacement(blockHeader);
                 }
                 else {
-                    if (blockHeader.number - lastBlock === 1) {
-                        if (reorg) {
-                            if (checkIsSynced(reorgToNumber)) {
-                                console.log("finished reorg: " + blockHeader.number);
-                                reorgToNumber = -1;
-                                saveReorgs(reorg);
-                                reorg = undefined;
-                            }
-                        }
-                        addNextBlock(blockHeader);
-                    } else if (blockHeader.number - lastBlock > 0) {
-                        if (!reorg) {
-                            reorg = {to: lastBlock, changedBlocks: []};
-                            reorgToNumber = lastBlock;
-                            console.log("reorgToNumber: " + reorgToNumber);
-                        }
-                        console.log("got higher number then expected: " + blockHeader.number + " instead of " + lastBlock);
-                        checkPreviousHashes(reorgToNumber);
-                        blocks[blockHeader.number] = blockHeader;
-                        console.log("add: " + blockHeader.number);
-                        lastBlock = blockHeader.number;
-                        removeFirst();
-                        reorg = undefined;
+                    if (blockHeader.number === lastBlock + 1) {
+                        gotNextBlock(blockHeader);
                     } else {
-                        console.log("insert in the middle: " + blockHeader.number);
-                        console.log(" reorg: " + reorg);
-                        blocks[blockHeader.number] = blockHeader;
-                        console.log("add: " + blockHeader.number);
-                        removeFirst();
+                        gotHigherBlockNumber(blockHeader);
                     }
                 }
             }
