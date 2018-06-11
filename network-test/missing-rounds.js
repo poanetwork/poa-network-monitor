@@ -19,7 +19,7 @@ async function checkMissingValidators() {
     let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
     let result = testHelper.checkForMissedValidators(blocksToTest, validatorsArr);
     console.log("passed: " + result.passed + ", result.missedValidators" + result.missedValidators);
-    sqlDao.addToMissingRounds([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
+    sqlDao.addToMissingRounds([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, JSON.stringify(result.missedValidators)]);
 }
 
 checkMissingValidators();

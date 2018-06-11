@@ -153,7 +153,7 @@ function all(sql, params) {
 
 function allWithTime(sql, lastSeconds) {
     if (lastSeconds) {
-        let fromTime = new Date(Date.now() - lastSeconds * 1000).toLocaleString();
+        let fromTime = new Date(Date.now() - lastSeconds * 1000).toISOString();
         console.log("fromTime: " + fromTime);
         return all(sql + " and time >= '" + fromTime + "'");
     }

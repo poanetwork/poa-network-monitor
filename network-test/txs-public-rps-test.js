@@ -39,7 +39,7 @@ async function sendTxsViaPublicRpc(networkName, url, txsNumber) {
             return error;
         }
         console.log("transactionResult: " + JSON.stringify(transactionResult));
-        sqlDao.addToTxsPublicRpcTable([new Date(Date.now()).toLocaleString(), (transactionResult.passed) ? 1 : 0,
+        sqlDao.addToTxsPublicRpcTable([new Date(Date.now()).toISOString(), (transactionResult.passed) ? 1 : 0,
             transactionResult.errorMessage, transactionResult.transactionHash, transactionResult.blockNumber, transactionResult.miner]);
     }
 }

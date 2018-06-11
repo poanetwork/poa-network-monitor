@@ -68,7 +68,7 @@ async function checkSeriesOfTransactions(maxRounds) {
             }
         }
     }
-    sqlDao.addToTxsTable([new Date(Date.now()).toLocaleString(), (passed) ? 1 : 0, JSON.stringify(validatorsMissedTxs), JSON.stringify(failedTxs)]);
+    sqlDao.addToTxsTable([new Date(Date.now()).toISOString(), (passed) ? 1 : 0, JSON.stringify(validatorsMissedTxs), JSON.stringify(failedTxs)]);
     console.log('passed: ' + passed + ', JSON.stringify(validatorsMissedTxs): '
         + JSON.stringify(validatorsMissedTxs) + ', JSON.stringify(failedTxs): ' + JSON.stringify(failedTxs));
     //TODO save number of mined non-empty blocks for every validator

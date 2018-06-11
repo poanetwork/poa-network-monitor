@@ -23,7 +23,7 @@ async function checkMiningReward() {
         let result = await checkBlocksRewards(blocksToTest[i]);
         console.log("passed: " + result.passed + ", rewardDetails: " + JSON.stringify(result.rewardDetails) +
             ", transactions: " + JSON.stringify(result.transactions));
-        sqlDao.addToRewardTable([new Date(Date.now()).toLocaleString(), (result.passed) ? 1 : 0, result.error,
+        sqlDao.addToRewardTable([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, result.error,
             JSON.stringify(result.rewardDetails), JSON.stringify(result.transactions)]);
     }
 

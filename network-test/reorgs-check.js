@@ -85,7 +85,7 @@ checkForReorgs()
 function saveReorgs(reorg) {
     console.log("saveReorgs(): " + JSON.stringify(reorg));
     if (reorg.changedBlocks.length > 0) {
-        sqlDao.addToReorgsTable([new Date(Date.now()).toLocaleString(), reorg.to, JSON.stringify(reorg.changedBlocks)]);
+        sqlDao.addToReorgsTable([new Date(Date.now()).toISOString(), reorg.to, JSON.stringify(reorg.changedBlocks)]);
     }
     else {
         console.log("no changed blocks");
