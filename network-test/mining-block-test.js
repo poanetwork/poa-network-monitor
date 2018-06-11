@@ -12,6 +12,7 @@ const web3 = getWeb3();
 let validatorsMinedTx = {};
 //for saving validators who mined blocks with txs
 let validatorsMinedTxSet = new Set();
+let lastBlock;
 
 checkSeriesOfTransactions(config.maxRounds)
     .then(result => {
@@ -68,7 +69,8 @@ async function checkSeriesOfTransactions(maxRounds) {
             }
         }
     }
-    sqlDao.addToTxsTable([new Date(Date.now()).toISOString(), (passed) ? 1 : 0, JSON.stringify(validatorsMissedTxs), JSON.stringify(failedTxs)]);
+    // todo save maxRounds
+    sqlDao.addToTxsTable([new Date(Date.now()).toISOString(), (passed) ? 1 : 0, lastBlock, JSON.stringify(validatorsMissedTxs), JSON.stringify(failedTxs)]);
     console.log('passed: ' + passed + ', JSON.stringify(validatorsMissedTxs): '
         + JSON.stringify(validatorsMissedTxs) + ', JSON.stringify(failedTxs): ' + JSON.stringify(failedTxs));
     //TODO save number of mined non-empty blocks for every validator
@@ -103,9 +105,10 @@ async function checkTxSending(validatorsArr) {
 }
 
 async function checkWhoMinedTxs(receipt) {
+    lastBlock = receipt.blockNumber;
     console.log("checkWhoMinedTxs ");
-    const block = await web3.eth.getBlock(receipt.blockNumber);
-    console.log("receipt.blockNumber: " + receipt.blockNumber);
+    const block = await web3.eth.getBlock(lastBlock);
+    console.log("receipt.blockNumber: " + lastBlock);
     if (!validatorsMinedTxSet.has(block.miner)) {
         validatorsMinedTxSet.add(block.miner);
     }

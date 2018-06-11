@@ -32,7 +32,7 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let runsMessage = "Time: " + run.time + ",\nmissed validators: " + run.missedValidators + "\n";
+                    let runsMessage = "Time: " + run.time + "\nlast block: " + run.lastBlock + ",\nmissed validators: " + run.missedValidators + "\n";
                     await sendAttachment("", runsMessage, true);
                 }
             }
@@ -68,7 +68,7 @@ https.get(url, (resp) => {
                 if (!run.passed) {
                     let validatorsMissedTxs = run.validatorsMissedTxs.length > 0 ? ("\nvalidators who didn't mine txs in " + config.maxRounds + " rounds: " + run.validatorsMissedTxs) : "";
                     let failedTxs = run.failedTxs.length > 0 ? ("\nfailed txs: " + JSON.stringify(run.failedTxs)) : "";
-                    await sendAttachment("", "Time: " + run.time + validatorsMissedTxs + failedTxs, true);
+                    await sendAttachment("", "Time: " + run.time + "\nlast block: " + run.lastBlock + validatorsMissedTxs + failedTxs, true);
                 }
             }
         }

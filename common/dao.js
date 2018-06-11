@@ -10,6 +10,7 @@ function SqlDao(networkName) {
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " lastBlock TEXT," +
         " missedValidators TEXT)";
     this.miningRewardTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.miningRewardTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
@@ -20,6 +21,7 @@ function SqlDao(networkName) {
     this.missedTxsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedTxsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " lastBlock TEXT," +
         " validatorsMissedTxs TEXT," +
         " failedTxs TEXT)";
 
@@ -67,13 +69,9 @@ function SqlDao(networkName) {
         console.log("createReorgsTable, sql: " + this.reorgsTableCreateSql);
         run(this.reorgsTableCreateSql);
     };
-    // this.reorgsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.reorgsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-    //     " time TEXT," +
-    //     " to TEXT," +
-    //     " changedBlocks TEXT)";
 
     this.addToMissingRounds = function (params) {
-        run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, missedValidators) VALUES ( ?, ?, ?)",
+        run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, lastBlock, missedValidators) VALUES ( ?, ?, ?, ?)",
             params);
     };
 
@@ -83,7 +81,7 @@ function SqlDao(networkName) {
     };
 
     this.addToTxsTable = function (params) {
-        run("INSERT INTO " + this.missedTxsTableName + " (time, passed, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?)",
+        run("INSERT INTO " + this.missedTxsTableName + " (time, passed, lastBlock, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?, ?)",
             params);
     };
 
@@ -96,11 +94,6 @@ function SqlDao(networkName) {
         run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
             params);
     };
-
-    // this.reorgsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.reorgsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
-    //     " time TEXT," +
-    //     " to TEXT," +
-    //     " changedBlocks TEXT)";
 
     this.getReorgs = async function (lastSeconds) {
         return allWithTime("SELECT * FROM " + this.reorgsTableName + " where 1 ", lastSeconds);
