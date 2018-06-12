@@ -74,14 +74,14 @@ node  /project/path/poa_monitor/test-result-monitor.js core http://localhost:854
 
 <h3>Add scripts to the crontab </h3>
 Run <code>sudo crontab -e -u user</code> <br>
-Crontab example: 
+Crontab example with timeout: 
 
 ```sh
-*/30 * * * * /path/to/scripts/missing-rounds.sh 
-*/30 * * * * /path/to/scripts/mining-reward.sh 
-*/30 * * * * /path/to/scripts/mining-block.sh 
-*/30 * * * * /home/natadmin/scripts/txs-public-rpc.sh
-10 * * * *  /path/to/scripts/monitor.sh 
+*/10 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds.sh
+*/10 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward.sh
+*/20 * * * *   timeout -s 2 17m /path/to/scripts/mining-block.sh
+*/15 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc.sh
+0,30 * * * *   timeout -s 2 15m /path/to/scripts/monitor.sh
 ```
 <h3>Run web server </h3>
 <code>nohup node /project/path/poa_monitor/webapp/index.js >>/path/to/logs/web_server.log 2>&1 & </code>
