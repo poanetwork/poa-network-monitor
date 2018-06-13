@@ -62,6 +62,41 @@ Example for the one test: <br>
 cd /project/path/poa_monitor;  node  /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
 node  /project/path/poa_monitor/network-test/missing-rounds.js core http://localhost:8541 >> /path/to/logs/missing-rounds-core-log 2>&1;
 ```
+For preventing duplicate cron job executions PID files can be used, in this case script can be created this way
+
+```sh
+#!/bin/bash
+PIDFILE=/path/to/pids/missing-rounds-sokol.pid
+if [ -f $PIDFILE ]
+then
+  PID=$(cat $PIDFILE)
+  ps -p $PID > /dev/null 2>&1
+  if [ $? -eq 0 ]
+  then
+    echo "Process is running"
+    exit 1
+  else
+    ## Process is not running
+    echo $$ > $PIDFILE
+    if [ $? -ne 0 ]
+    then
+      echo "Could not create PID file"
+      exit 1
+    fi
+  fi
+else
+  echo $$ > $PIDFILE
+  if [ $? -ne 0 ]
+  then
+    echo "Could not create PID file"
+    exit 1
+  fi
+fi
+
+node  /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
+
+rm $PIDFILE
+```
 
 The same way scripts for other tests can be created <br><br>
 When running monitor the time in seconds can be specified for checking last result. <br>
@@ -79,7 +114,7 @@ Crontab example with timeout:
 ```sh
 */10 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds.sh
 */10 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward.sh
-*/20 * * * *   timeout -s 2 17m /path/to/scripts/mining-block.sh
+0,30  * * * *   timeout -s 2 25m /path/to/scripts/mining-block.sh
 */15 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc.sh
 0,30 * * * *   timeout -s 2 15m /path/to/scripts/monitor.sh
 ```
