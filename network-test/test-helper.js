@@ -48,6 +48,7 @@ let testHelper = {
     },
 
     checkTxReceipt: async function (web3, receipt, initialBalanceFrom, initialBalanceTo) {
+        // todo check tx result (status)
         let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
         let tx = await web3.eth.getTransaction(receipt.transactionHash);
         let amountBN = new BN(config.amountToSend);

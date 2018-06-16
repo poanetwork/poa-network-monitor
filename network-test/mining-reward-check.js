@@ -49,6 +49,7 @@ async function checkBlocksRewards(block) {
     console.log("config.miningReward: " + config.miningReward);
     //reward will be different if there are txs
     for (let j = 0; j < block.transactions.length; j++) {
+        // todo check value
         let details = {hash: "", price: "", value: "", to: "", from: ""};
         let tx = await web3.eth.getTransaction(block.transactions[j]);
         let gasPrice = new BN(tx.gasPrice);

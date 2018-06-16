@@ -4,6 +4,7 @@ let express = require('express');
 let app = express();
 
 function sendJson(result, response) {
+    response.header("Access-Control-Allow-Origin", "*");
     response.setHeader('Content-Type', 'application/json');
     response.send(JSON.stringify(result));
 }
@@ -12,7 +13,8 @@ app.get('/sokol/api/all', async function (request, response) {
     sqlDao = new SqlDao("sokol");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
-    let result = await getTests(true, lastSeconds);
+    let testNumber = getTestIndex(request);
+    let result = await getTests(true, lastSeconds, testNumber);
     sendJson(result, response);
 });
 
@@ -20,7 +22,8 @@ app.get('/core/api/all', async function (request, response) {
     sqlDao = new SqlDao("core");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
-    let result = await getTests(true, lastSeconds);
+    let testNumber = getTestIndex(request);
+    let result = await getTests(true, lastSeconds, testNumber);
     sendJson(result, response);
 });
 
@@ -28,7 +31,8 @@ app.get('/sokol/api/failed', async function (request, response) {
     sqlDao = new SqlDao("sokol");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
-    let result = await getTests(false, lastSeconds);
+    let testNumber = getTestIndex(request);
+    let result = await getTests(false, lastSeconds, testNumber);
     sendJson(result, response);
 });
 
@@ -36,11 +40,87 @@ app.get('/core/api/failed', async function (request, response) {
     sqlDao = new SqlDao("core");
     let lastSeconds = getLastSeconds(request);
     console.log("lastSeconds: " + lastSeconds);
-    let result = await getTests(false, lastSeconds);
+    let testNumber = getTestIndex(request);
+    let result = await getTests(false, lastSeconds, testNumber);
     sendJson(result, response);
 });
 
-async function getTests(passed, lastSeconds) {
+async function getRoundsRuns(passed, lastSeconds) {
+    let roundsRuns = [];
+    if (passed) {
+        roundsRuns = await sqlDao.getMissedRounds(lastSeconds);
+    }
+    else {
+        roundsRuns = await sqlDao.getFailedMissedRounds(lastSeconds);
+    }
+
+    if (roundsRuns.length > 0) {
+        roundsRuns.map(function (run) {
+            run.missedValidators = JSON.parse(run.missedValidators);
+        });
+    }
+    return roundsRuns;
+}
+
+async function getTxsRuns(passed, lastSeconds) {
+    let txsRuns = [];
+    if (passed) {
+        txsRuns = await sqlDao.getMissedTxs(lastSeconds);
+    }
+    else {
+        txsRuns = await sqlDao.getFailedMissedTxs(lastSeconds);
+    }
+
+    if (txsRuns.length > 0) {
+        txsRuns.map(function (tx) {
+            tx.validatorsMissedTxs = JSON.parse(tx.validatorsMissedTxs);
+            tx.failedTxs = JSON.parse(tx.failedTxs);
+        });
+
+    }
+    return txsRuns;
+}
+
+async function getRewardsRuns(passed, lastSeconds) {
+    let rewardsRuns = [];
+    if (passed) {
+        rewardsRuns = await sqlDao.getRewards(lastSeconds);
+    }
+    else {
+        rewardsRuns = await sqlDao.getFailedRewards(lastSeconds);
+    }
+    if (rewardsRuns.length > 0) {
+        rewardsRuns.map(function (run) {
+            run.rewardDetails = JSON.parse(run.rewardDetails);
+            run.transactions = JSON.parse(run.transactions);
+        });
+    }
+    return rewardsRuns;
+}
+
+async function getTxsPublicRpcRuns(passed, lastSeconds) {
+    let txsPublicRpcRuns = [];
+    if (passed) {
+        txsPublicRpcRuns = await sqlDao.getTxsPublicRpc(lastSeconds);
+    }
+    else {
+        txsPublicRpcRuns = await sqlDao.getFailedTxsPublicRpc(lastSeconds);
+    }
+    return txsPublicRpcRuns;
+}
+
+async function getReorgs(lastSeconds) {
+    let reorgs = await sqlDao.getReorgs(lastSeconds);
+    if (reorgs.length > 0) {
+        reorgs.map(function (reorg) {
+            reorg.changedBlocks = JSON.parse(reorg.changedBlocks);
+        });
+    }
+    return reorgs;
+}
+
+async function getTests(passed, lastSeconds, testNumber) {
+    console.log("getTests testNumber: " + testNumber);
     let resultMissingRounds = {description: "Check if any validator nodes are missing rounds", runs: []};
     let resultMissingTxs = {
         description: "Check that all validator nodes are able to mine non-empty blocks",
@@ -65,53 +145,30 @@ async function getTests(passed, lastSeconds) {
     let rewardsRuns;
     let txsPublicRpcRuns;
     let reorgs;
-    reorgs = await sqlDao.getReorgs(lastSeconds);
-    if (reorgs.length > 0) {
-        reorgs.map(function (reorg) {
-            reorg.changedBlocks = JSON.parse(reorg.changedBlocks);
-        });
-        resultReorgs.reorgs = reorgs;
-    }
-    if (passed) {
-        txsRuns = await sqlDao.getMissedTxs(lastSeconds);
-        roundsRuns = await sqlDao.getMissedRounds(lastSeconds);
-        rewardsRuns = await sqlDao.getRewards(lastSeconds);
-        txsPublicRpcRuns = await sqlDao.getTxsPublicRpc(lastSeconds);
-    }
-    else {
-        txsRuns = await sqlDao.getFailedMissedTxs(lastSeconds);
-        roundsRuns = await sqlDao.getFailedMissedRounds(lastSeconds);
-        rewardsRuns = await sqlDao.getFailedRewards(lastSeconds);
-        txsPublicRpcRuns = await sqlDao.getFailedTxsPublicRpc(lastSeconds);
-    }
 
-    if (txsRuns.length > 0) {
-        txsRuns.map(function (tx) {
-            tx.validatorsMissedTxs = JSON.parse(tx.validatorsMissedTxs);
-            tx.failedTxs = JSON.parse(tx.failedTxs);
-        });
+    if (!testNumber || testNumber === 1) {
+        console.log("1");
+        roundsRuns = await getRoundsRuns(passed, lastSeconds);
+        resultMissingRounds.runs = roundsRuns
+
+    }
+    if (!testNumber || testNumber === 2) {
+        txsRuns = await getTxsRuns;
         resultMissingTxs.runs = txsRuns;
     }
-
-    if (roundsRuns.length > 0) {
-        roundsRuns.map(function (run) {
-            run.missedValidators = JSON.parse(run.missedValidators);
-        });
-        resultMissingRounds.runs = roundsRuns;
-    }
-
-    if (rewardsRuns.length > 0) {
-        rewardsRuns.map(function (run) {
-            run.rewardDetails = JSON.parse(run.rewardDetails);
-            run.transactions = JSON.parse(run.transactions);
-        });
+    if (!testNumber || testNumber === 3) {
+        rewardsRuns = await getRewardsRuns(passed, lastSeconds);
         resultMiningReward.runs = rewardsRuns;
-    }
-    if (txsPublicRpcRuns.length > 0) {
-        resultTxsPublicRpc.runs = txsPublicRpcRuns;
-    }
 
-
+    }
+    if (!testNumber || testNumber === 4) {
+        txsPublicRpcRuns = await getTxsPublicRpcRuns(passed, lastSeconds);
+        resultTxsPublicRpc = txsPublicRpcRuns;
+    }
+    if (!testNumber || testNumber === 5) {
+        reorgs = await getReorgs(lastSeconds);
+        resultReorgs.reorgs = reorgs;
+    }
     return {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
@@ -140,6 +197,16 @@ function getLastSeconds(request) {
         time = undefined;
     }
     return time;
+}
+
+function getTestIndex(request) {
+    // todo with enum
+    let test = parseInt(request.query["test"]);
+    if (typeof test !== 'number' || test < 1 || test > 5) {
+        test = undefined;
+    }
+    console.log("test number: " + test);
+    return test;
 }
 
 app.listen(3000, function () {

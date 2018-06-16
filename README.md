@@ -32,7 +32,7 @@ Install dependencies <br>
 
 ```sh
 cd poa-network-monitor 
-npm init
+npm install
 ```
 3.Run parity nodes <br>
 For running parity node enable JSONRPC when connecting to POA Network on Parity <code>--jsonrpc-apis all</code><br>
