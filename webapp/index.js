@@ -163,7 +163,7 @@ async function getTests(passed, lastSeconds, testNumber) {
     }
     if (!testNumber || testNumber === 4) {
         txsPublicRpcRuns = await getTxsPublicRpcRuns(passed, lastSeconds);
-        resultTxsPublicRpc = txsPublicRpcRuns;
+        resultTxsPublicRpc.runs = txsPublicRpcRuns;
     }
     if (!testNumber || testNumber === 5) {
         reorgs = await getReorgs(lastSeconds);
