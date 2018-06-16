@@ -153,7 +153,7 @@ async function getTests(passed, lastSeconds, testNumber) {
 
     }
     if (!testNumber || testNumber === 2) {
-        txsRuns = await getTxsRuns;
+        txsRuns = await getTxsRuns(passed, lastSeconds);
         resultMissingTxs.runs = txsRuns;
     }
     if (!testNumber || testNumber === 3) {
