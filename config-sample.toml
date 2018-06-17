@@ -26,5 +26,8 @@ miningReward = "1000000000000000000"
 keyStorePath = "\path\a0db34...745f0b.json"
 txsNumber = 10
 
+# Reorgs settings
+maxBlocksToSave = 20
+
 #slack
 slackWebHookUrl = 'https://hooks.slack.com/services/............token'

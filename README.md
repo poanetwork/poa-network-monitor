@@ -54,6 +54,7 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 
 <h3>Create scripts for running monitor and tests. </h3>
+<h6>Tests</h6>
 Network name and url can be added as parameters, otherwise it will be taken from the toml file. <br>
 Example for the one test: <br>
 
@@ -99,6 +100,20 @@ rm $PIDFILE
 ```
 
 The same way scripts for other tests can be created <br><br>
+
+<h6>Reorgs</h6>
+Run reorgs test for the each network:
+
+```sh
+nohup node /home/natadmin/poa_monitor/poa-network-test/network-test/reorgs-check.js  core   ws://localhost:8451  >>reorgs_core.log 2>&1  &
+```
+
+```sh
+nohup node /home/natadmin/poa_monitor/poa-network-test/network-test/reorgs-check.js  sokol   ws://localhost:8450  >>reorgs_sokol.log 2>&1  &
+```
+Test for reorgs runs continuously so it's no need to add it on cron.
+
+<h6>Monitor</h6>
 When running monitor the time in seconds can be specified for checking last result. <br>
 
 ```sh
