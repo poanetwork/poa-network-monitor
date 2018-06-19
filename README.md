@@ -74,10 +74,10 @@ node scripts/newAccount.js core http://localhost:8541 password
 2. Add created addresses and passwords to the <code>Sending txs test</code> section of the <code>config.toml</code> file. <code>addressFrom..</code> must be address with POA 
 
 <h6>For sending txs via public RPC test (txs-public-rpc-test.js)</h6>
- This test can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file.
-1. Create 2 accounts in each network, add POA to the one of them. <br>
-2. Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file. <br> 
-3. Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
+ This test can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file. <br>
+1.Create 2 accounts in each network, add POA to the one of them. <br>
+2.Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file. <br> 
+3.Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
  Keystore file is usually located in the <code>~/.local/share/io.parity.ethereum/keys/</code> folder.
  
 <h3>Create scripts for running monitor and tests. </h3>
