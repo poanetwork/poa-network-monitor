@@ -28,7 +28,7 @@ function getWeb3(isWebsocket) {
 }
 
 function getDecryptedAccount() {
-    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(keyStore), config.passwordFromPublicRpcTest);
+    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(keyStore), config["passwordFromPublicRpcTest_" + getNetworkName()]);
     console.log('decryptedAccount.address: ' + decryptedAccount.address);
     return decryptedAccount;
 }

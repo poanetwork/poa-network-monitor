@@ -1,7 +1,7 @@
 const fs = require('fs');
 const toml = require('toml');
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf-8'));
-let keyStore = fs.readFileSync(config.keyStorePath);
+let keyStore = fs.readFileSync(config["keyStorePath_" + getNetworkName()]);
 
 function getNetworkName() {
     let network = "";

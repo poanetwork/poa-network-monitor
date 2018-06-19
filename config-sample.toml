@@ -1,21 +1,31 @@
 #  settings
 url = "http://localhost:8545"
 network = "sokol" # "core" for the main and "sokol" for the test network
-timeout = 500000
 
 # mining-block-test settings
 maxRounds = 5
 
-# Test accounts
-addressFromTxTest = "0x...dfcb"
-passwordFromTxTest = "password"
-addressToTxTest = "0x...a72"
-passwordToTxTest = "password"
+# Sending txs test
+addressFromTxTest_sokol = "0x...dfcb"
+passwordFromTxTest_sokol = "password"
+addressToTxTest_sokol = "0x...a72"
+passwordToTxTest_sokol = "password"
 
-addressFromPublicRpcTest = "0x...cb"
-passwordFromPublicRpcTest = "password"
-addressToPublicRpcTest = "0x....2"
-passwordToPublicRpcTest = "password"
+addressFromTxTest_core = "0x"
+passwordFromTxTest_core = "password"
+addressToTxTest_core = "0x.."
+passwordToTxTest_core = "password"
+
+#Sending txs via public RPC test
+keyStorePath_sokol = "\path\a0db34...745f0b.json"
+passwordFromPublicRpcTest_sokol = "password"
+addressToPublicRpcTest_sokol = "0x....2"
+passwordToPublicRpcTest_sokol = "password"
+
+keyStorePath_core = "\path\..json"
+passwordFromPublicRpcTest_core = "password"
+addressToPublicRpcTest_core = "0x...."
+passwordToPublicRpcTest_core = "password"
 
 # Transaction settings
 gasPrice = "1000000000"
@@ -23,7 +33,6 @@ simpleTransactionGas = "21000"
 simpleTransactionCost = "21000000000000" # equals to gas multipty by gascost: 21000 * 1000000000
 amountToSend = "20000000000"
 miningReward = "1000000000000000000"
-keyStorePath = "\path\a0db34...745f0b.json"
 txsNumber = 10
 
 # Reorgs settings

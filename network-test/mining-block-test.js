@@ -6,7 +6,8 @@ const {
     getNetworkName
 } = require('./test-helper.js');
 const {SqlDao} = require('../common/dao.js');
-const sqlDao = new SqlDao(getNetworkName());
+let networkName = getNetworkName();
+const sqlDao = new SqlDao(networkName);
 sqlDao.createTxsTable();
 const web3 = getWeb3();
 let validatorsMinedTx = {};
@@ -81,17 +82,17 @@ Sends transaction, checks it was confirmed and balance changed properly
  */
 async function checkTxSending(validatorsArr) {
     console.log("checkTxSending()");
-    await web3.eth.personal.unlockAccount(config.addressFromTxTest, config.passwordFromTxTest);
-    console.log("config.addressFromTxTest: " + config.addressFromTxTest);
-    let initialBalanceFrom = await web3.eth.getBalance(config.addressFromTxTest);
+    await web3.eth.personal.unlockAccount(config["addressFromTxTest_" + networkName], config["passwordFromTxTest_" + networkName]);
+    console.log("config.addressFromTxTest: " + config["addressFromTxTest_" + networkName]);
+    let initialBalanceFrom = await web3.eth.getBalance(config["addressFromTxTest_" + networkName]);
     console.log("initialBalanceFrom: " + initialBalanceFrom);
-    let initialBalanceTo = await web3.eth.getBalance(config.addressToTxTest);
+    let initialBalanceTo = await web3.eth.getBalance(config["addressToTxTest_" + networkName]);
     let receipt;
     try {
         receipt = await sendTransaction({
-            to: config.addressToTxTest,
+            to: config["addressToTxTest_" + networkName],
             value: config.amountToSend,
-            from: config.addressFromTxTest,
+            from: config["addressFromTxTest_" + networkName],
             gasPrice: config.gasPrice
         });
     } catch (error) {
