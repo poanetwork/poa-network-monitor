@@ -70,13 +70,13 @@ node scripts/newAccount.js core http://localhost:8541 password
 ```
 
 <h6>For sending txs test (missing-rounds.js)</h6>
-1. Create 2 accounts (in each network), add POA to the one of them. For the Sokol network test POA can be added <a href="https://faucet-sokol.herokuapp.com/">here</a> 
+1. Create 2 accounts (in each network), add POA to the one of them. For the Sokol network test POA can be added <a href="https://faucet-sokol.herokuapp.com/">here</a> <br>
 2. Add created addresses and passwords to the <code>Sending txs test</code> section of the <code>config.toml</code> file. <code>addressFrom..</code> must be address with POA 
 
 <h6>For sending txs via public RPC test (txs-public-rpc-test.js)</h6>
  This test can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file.
-1. Create 2 accounts in each network, add POA to the one of them. 
-2. Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file.  
+1. Create 2 accounts in each network, add POA to the one of them. <br>
+2. Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file. <br> 
 3. Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
  Keystore file is usually located in the <code>~/.local/share/io.parity.ethereum/keys/</code> folder.
  
@@ -145,8 +145,8 @@ When running monitor the time in seconds can be specified for checking last resu
 
 ```sh
 #!/bin/sh <br>
-cd /project/path/poa_monitor; node /project/path/poa_monitor/test-result-monitor.js sokol http://localhost:8540 2400 >>/path/to/logs/monitor-sokol-log 2>&1;
-node /project/path/poa_monitor/test-result-monitor.js core http://localhost:8541 2400 >>/path/to/logs/monitor-core-log 2>&1
+cd /project/path/poa_monitor; node /project/path/poa_monitor/test-result-monitor.js sokol http://localhost:8540 1800 >>/path/to/logs/monitor-sokol-log 2>&1;
+node /project/path/poa_monitor/test-result-monitor.js core http://localhost:8541 1800 >>/path/to/logs/monitor-core-log 2>&1
 ```
 
 <h3>Add scripts to the crontab </h3>
