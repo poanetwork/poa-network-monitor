@@ -52,6 +52,34 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 <br>url will be http://localhost:8541
 
+<h3>Edit the configuration file</h3>
+Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename). Specify <code>slackWebHookUrl</code>. Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>. 
+Other settings can be changed too, accounts creation is described below. 
+
+<h3>Create test accounts</h3>
+For account creating newAccount.js script can be used. 
+It will create encrypted account using specified password and print it's address.
+For the Sokol:
+
+```sh
+node scripts/newAccount.js sokol http://localhost:8540 password
+```
+Core:
+```sh
+node scripts/newAccount.js core http://localhost:8541 password
+```
+
+<h6>For sending txs test (missing-rounds.js)</h6>
+1. Create 2 accounts (in each network), add POA to the one of them. For the Sokol network test POA can be added <a href="https://faucet-sokol.herokuapp.com/">here</a> 
+2. Add created addresses and passwords to the <code>Sending txs test</code> section of the <code>config.toml</code> file. <code>addressFrom..</code> must be address with POA 
+
+<h6>For sending txs via public RPC test (txs-public-rpc-test.js)</h6>
+ This test can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file.
+1. Create 2 accounts in each network, add POA to the one of them. 
+2. Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file.  
+3. Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
+ Keystore file is usually located in the <code>~/.local/share/io.parity.ethereum/keys/</code> folder.
+ 
 <h3>Create scripts for running monitor and tests. </h3>
 <h6>Tests</h6>
 Network name and url can be added as parameters, otherwise it will be taken from the toml file. <br>
@@ -62,7 +90,7 @@ Example for the one test: <br>
 cd /project/path/poa_monitor; node /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
 node /project/path/poa_monitor/network-test/missing-rounds.js core http://localhost:8541 >> /path/to/logs/missing-rounds-core-log 2>&1;
 ```
-For preventing duplicate cron job executions PID files can be used, in this case script can be created this way
+For preventing duplicate cron job executions PID files can be used, in this case script can be created this way for each network
 
 ```sh
 #!/bin/bash
@@ -126,11 +154,15 @@ Run <code>sudo crontab -e -u user</code> <br>
 Crontab example with timeout: 
 
 ```sh
-*/10 * * * * timeout -s 2 8m /path/to/scripts/missing-rounds.sh
-*/10 * * * * timeout -s 2 8m /path/to/scripts/mining-reward.sh
-0,30  * * * * timeout -s 2 25m /path/to/scripts/mining-block.sh
-*/15 * * * * timeout -s 2 12m /path/to/scripts/txs-public-rpc.sh
-0,30 * * * * timeout -s 2 15m /path/to/scripts/monitor.sh
+*/10 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds-sokol.sh
+*/12 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds-core.sh
+*/14 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward-sokol.sh
+*/16 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward-core.sh
+0,30 * * * *   timeout -s 2 25m /path/to/scripts/txs-sokol.sh
+5,35 * * * *   timeout -s 2 25m /path/to/scripts/txs-core.sh
+*/15 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc-sokol.sh
+*/17 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc-core.sh
+0,30 * * * *   timeout -s 2 15m /path/to/scripts/monitor.sh
 ```
 <h3>Run web server </h3>
 <code>nohup node /project/path/poa_monitor/webapp/index.js >>/path/to/logs/web_server.log 2>&1 & </code>
