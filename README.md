@@ -14,6 +14,8 @@ for working with sqlite database.
 </li>
 <li><code>webapp</code> folder contains web server for retrieving test results
 </li>
+<li><code>scripts</code> folder contains script for new accounts creating and bash scripts for running tests and monitor
+</li>
 <li><code>test-result-monitor.js</code> file checks test results via web server and send alert to slack channel. 
 Also uses the command line arguments to detect network name and url</li>
 <li><code>config-sample.toml</code> is example of file with settings. Needs to be renamed to <code>config.toml</code> 
@@ -52,6 +54,20 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 <br>url will be http://localhost:8541
 
+<h3>Add repository path to the environment variable</h3>
+Bash scripts run on cron in it's directory so need to use absolute path. <br>
+1.Run in the terminal
+
+```sh
+sudo nano /etc/environment
+```
+2.Add repository path to the file:
+
+```sh
+POA_MONITOR_PATH="/home/user/poa-network-monitor"
+```
+3.Logout from the current user and login again so environment variables changes take place
+
 <h3>Edit the configuration file</h3>
 Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename). Specify <code>slackWebHookUrl</code>. Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>. 
 Other settings can be changed too, accounts creation is described below. 
@@ -62,11 +78,11 @@ It will create encrypted account using specified password and print it's address
 For the Sokol:
 
 ```sh
-node scripts/newAccount.js sokol http://localhost:8540 password
+node $POA_MONITOR_PATH/cripts/newAccount.js sokol http://localhost:8540 password
 ```
 Core:
 ```sh
-node scripts/newAccount.js core http://localhost:8541 password
+node $POA_MONITOR_PATH/scripts/newAccount.js core http://localhost:8541 password
 ```
 
 <h6>For sending txs test (missing-rounds.js)</h6>
@@ -80,89 +96,71 @@ node scripts/newAccount.js core http://localhost:8541 password
 3.Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
  Keystore file is usually located in the <code>~/.local/share/io.parity.ethereum/keys/</code> folder.
  
-<h3>Create scripts for running monitor and tests. </h3>
+<h3>Setup scripts for running monitor and tests. </h3>
 <h6>Tests</h6>
-Network name and url can be added as parameters, otherwise it will be taken from the toml file. <br>
-Example for the one test: <br>
+Bash scripts for running tests and monitor are located in the <code>scripts</code> folder. They can be used for adding to cron. <br>
+Before using first is needed to make them executable. Run in the terminal:
+```sh
+ chmod +x $POA_MONITOR_PATH/scripts/test-runner.sh
+ chmod +x $POA_MONITOR_PATH/scripts/missing-rounds-sokol.sh
+ chmod +x $POA_MONITOR_PATH/scripts/missing-rounds-core.sh
+ chmod +x $POA_MONITOR_PATH/scripts/mining-reward-sokol.sh
+ chmod +x $POA_MONITOR_PATH/scripts/mining-reward-core.sh
+ chmod +x $POA_MONITOR_PATH/scripts/txs-sokol.sh
+ chmod +x $POA_MONITOR_PATH/scripts/txs-core.sh
+ chmod +x $POA_MONITOR_PATH/scripts/txs-public-rpc-sokol.sh
+ chmod +x $POA_MONITOR_PATH/scripts/txs-public-rpc-core.sh
+ chmod +x $POA_MONITOR_PATH/scripts/monitor-sokol.sh
+ chmod +x $POA_MONITOR_PATH/scripts/monitor-core.sh
+ ```
+  <br>
+Example script for running separate test: <br>
 
 ```sh
-#!/bin/sh <br>
-cd /project/path/poa_monitor; node /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
-node /project/path/poa_monitor/network-test/missing-rounds.js core http://localhost:8541 >> /path/to/logs/missing-rounds-core-log 2>&1;
+#!/bin/sh 
+cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/network-test/missing-rounds.js sokol http://localhost:8540 >> $POA_MONITOR_PATH/logs/missing-rounds-sokol-log 2>&1;
+node $POA_MONITOR_PATH/network-test/missing-rounds.js core http://localhost:8541 >> $POA_MONITOR_PATH/logs/missing-rounds-core-log 2>&1;
 ```
-For preventing duplicate cron job executions PID files can be used, in this case script can be created this way for each network
-
-```sh
-#!/bin/bash
-PIDFILE=/path/to/pids/missing-rounds-sokol.pid
-if [ -f $PIDFILE ]
-then
-  PID=$(cat $PIDFILE)
-  ps -p $PID > /dev/null 2>&1
-  if [ $? -eq 0 ]
-  then
-    echo "Process is running"
-    exit 1
-  else
-    ## Process is not running
-    echo $$ > $PIDFILE
-    if [ $? -ne 0 ]
-    then
-      echo "Could not create PID file"
-      exit 1
-    fi
-  fi
-else
-  echo $$ > $PIDFILE
-  if [ $? -ne 0 ]
-  then
-    echo "Could not create PID file"
-    exit 1
-  fi
-fi
-
-node /project/path/poa_monitor/network-test/missing-rounds.js sokol http://localhost:8540 >> /path/to/logs/missing-rounds-sokol-log 2>&1;
-
-rm $PIDFILE
-```
-
-The same way scripts for other tests can be created <br><br>
 
 <h6>Reorgs</h6>
 Run reorgs test for the each network:
 
 ```sh
-nohup node /home/natadmin/poa_monitor/poa-network-test/network-test/reorgs-check.js core ws://localhost:8451  >>reorgs_core.log 2>&1 &
+nohup node $POA_MONITOR_PATH/network-test/reorgs-check.js core ws://localhost:8451  >> $POA_MONITOR_PATH/logs/reorgs_core.log 2>&1 &
 ```
 
 ```sh
-nohup node /home/natadmin/poa_monitor/poa-network-test/network-test/reorgs-check.js sokol ws://localhost:8450  >>reorgs_sokol.log 2>&1 &
+nohup node $POA_MONITOR_PATH/network-test/reorgs-check.js sokol ws://localhost:8450  >> $POA_MONITOR_PATH/logs/reorgs_sokol.log 2>&1 &
 ```
 Test for reorgs runs continuously so it's not needed to add it on cron.
 
 <h6>Monitor</h6>
 When running monitor the time in seconds can be specified for checking last result. <br>
+Script for separate run:
 
 ```sh
 #!/bin/sh <br>
-cd /project/path/poa_monitor; node /project/path/poa_monitor/test-result-monitor.js sokol http://localhost:8540 1800 >>/path/to/logs/monitor-sokol-log 2>&1;
-node /project/path/poa_monitor/test-result-monitor.js core http://localhost:8541 1800 >>/path/to/logs/monitor-core-log 2>&1
+cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/test-result-monitor.js sokol http://localhost:8540 1800 >> $POA_MONITOR_PATH/logs/monitor-sokol-log 2>&1;
+node $POA_MONITOR_PATH/test-result-monitor.js core http://localhost:8541 1800 >> $POA_MONITOR_PATH/logs/monitor-core-log 2>&1
 ```
+Scripts for monitor running are located in the <code>scripts</code> folder.
 
 <h3>Add scripts to the crontab </h3>
 Run <code>sudo crontab -e -u user</code> <br>
 Crontab example with timeout: 
 
 ```sh
-*/10 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds-sokol.sh
-*/12 * * * *  timeout -s 2 8m /path/to/scripts/missing-rounds-core.sh
-*/14 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward-sokol.sh
-*/16 * * * *  timeout -s 2 8m /path/to/scripts/mining-reward-core.sh
-0,30 * * * *   timeout -s 2 25m /path/to/scripts/txs-sokol.sh
-5,35 * * * *   timeout -s 2 25m /path/to/scripts/txs-core.sh
-*/15 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc-sokol.sh
-*/17 * * * *  timeout -s 2 12m /path/to/scripts/txs-public-rpc-core.sh
-0,30 * * * *   timeout -s 2 15m /path/to/scripts/monitor.sh
+*/10 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-sokol
+*/12 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-core
+*/14 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-sokol
+*/16 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-core
+0,30 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-sokol
+5,35 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-core
+*/15 * * * *  timeout -s 2 12m $POA_MONITOR_PATH/scripts/test-runner.sh txs-public-rpc-sokol
+*/17 * * * *  timeout -s 2 12m $POA_MONITOR_PATH/scripts/test-runner.sh txs-public-rpc-core
+0,30 * * * *  timeout -s 2 15m $POA_MONITOR_PATH/scripts/test-runner.sh monitor-sokol
+5,35 * * * *  timeout -s 2 15m $POA_MONITOR_PATH/scripts/test-runner.sh monitor-core
+
 ```
 <h3>Run web server </h3>
-<code>nohup node /project/path/poa_monitor/webapp/index.js >>/path/to/logs/web_server.log 2>&1 & </code>
+<code>nohup node $POA_MONITOR_PATH/webapp/index.js >> $POA_MONITOR_PATH/logs/web_server.log 2>&1 & </code>
