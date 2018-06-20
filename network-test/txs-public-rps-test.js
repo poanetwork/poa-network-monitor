@@ -3,16 +3,17 @@ const {
     utils,
     BN,
     testHelper,
+    getNetworkName,
+    getWeb3,
     getDecryptedAccount
 } = require('./test-helper.js');
 const {SqlDao} = require('../common/dao.js');
 let sqlDao;
-const Web3 = require("web3");
-let web3;
 const EthereumTx = require('ethereumjs-tx');
+let web3 = getWeb3();
+let networkName = getNetworkName();
 
-//todo for core
-sendTxsViaPublicRpc("sokol", "https://sokol.poa.network", config.txsNumber)
+sendTxsViaPublicRpc(config.txsNumber)
     .then(result => {
         console.log("sendTxsViaPublicRpc done ");
     })
@@ -21,11 +22,10 @@ sendTxsViaPublicRpc("sokol", "https://sokol.poa.network", config.txsNumber)
     });
 
 // periodically send txs via public rpc endpoint
-async function sendTxsViaPublicRpc(networkName, url, txsNumber) {
+async function sendTxsViaPublicRpc(txsNumber) {
     //todo different account
     sqlDao = new SqlDao(networkName);
     sqlDao.createTxsPublicRpcTable();
-    web3 = new Web3(new Web3.providers.HttpProvider(url));
     let decryptedAccount = getDecryptedAccount();
     for (let i = 0; i < txsNumber; i++) {
         let initialBalanceFrom = await web3.eth.getBalance(decryptedAccount.address);

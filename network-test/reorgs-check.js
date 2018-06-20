@@ -87,7 +87,7 @@ function addNextBlock(block) {
 }
 
 /**
- * Removes the most old of saved blocks
+ * Removes the oldest of saved blocks
  */
 function removeFirst() {
     delete blocks[firstBlock];
