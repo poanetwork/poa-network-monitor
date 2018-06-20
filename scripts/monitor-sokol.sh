@@ -1,6 +1,4 @@
 #!/bin/bash
 
-cd $1/.. ;
-fullpath=$(pwd)
-node  $fullpath/test-result-monitor.js sokol http://localhost:8540 >> monitor-sokol-log 2>&1;
+node  $POA_MONITOR_PATH/test-result-monitor.js sokol http://localhost:8540 >> monitor-sokol-log 2>&1;
 

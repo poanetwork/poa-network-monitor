@@ -1,12 +1,10 @@
 #!/bin/bash
 
-echo "fullpath:"
-fullpath=$(pwd)
-echo "$fullpath"
+echo "POA_MONITOR_PATH:"
+echo $POA_MONITOR_PATH
 echo "$1"
-echo "$#"
 
-PIDFILE=$fullpath/pids/$1
+PIDFILE=$POA_MONITOR_PATH/scripts/pids/$1
 
 if [ -f $PIDFILE ]
 then
@@ -35,6 +33,6 @@ else
 fi
 
 # run test and send full path as argument
-$fullpath/$1.sh $fullpath
+$POA_MONITOR_PATH/scripts/$1.sh
 
 rm $PIDFILE
