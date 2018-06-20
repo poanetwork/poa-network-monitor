@@ -14,7 +14,7 @@ for working with sqlite database.
 </li>
 <li><code>webapp</code> folder contains web server for retrieving test results
 </li>
-<li><code>scripts</code> folder contains script for new accounts creating and bash scripts for running tests and monitor
+<li><code>scripts</code> folder contains script for new accounts creating and bash scripts for running tests and monitor.
 </li>
 <li><code>test-result-monitor.js</code> file checks test results via web server and send alert to slack channel. 
 Also uses the command line arguments to detect network name and url</li>
@@ -100,6 +100,7 @@ node $POA_MONITOR_PATH/scripts/newAccount.js core http://localhost:8541 password
 <h6>Tests</h6>
 Bash scripts for running tests and monitor are located in the <code>scripts</code> folder. They can be used for adding to cron. <br>
 Before using first is needed to make them executable. Run in the terminal:
+
 ```sh
  chmod +x $POA_MONITOR_PATH/scripts/test-runner.sh
  chmod +x $POA_MONITOR_PATH/scripts/missing-rounds-sokol.sh
