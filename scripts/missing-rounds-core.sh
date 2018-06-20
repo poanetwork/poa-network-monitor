@@ -1,4 +1,5 @@
 #!/bin/bash
 
-node  $POA_MONITOR_PATH/network-test/missing-rounds.js core http://localhost:8541 >> missing-rounds-core-log 2>&1;
+cd $POA_MONITOR_PATH
+node  $POA_MONITOR_PATH/network-test/missing-rounds.js core http://localhost:8541 >> $POA_MONITOR_PATH/logs/missing-rounds-core-log 2>&1;
 
