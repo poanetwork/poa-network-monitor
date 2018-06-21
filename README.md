@@ -15,6 +15,8 @@ for working with sqlite database.
 <li><code>webapp</code> folder contains web server for retrieving test results
 </li>
 <li><code>scripts</code> folder contains script for new accounts creating and bash scripts for running tests and monitor.
+<code>test-runner.sh</code> file contains logic to prevent duplicate test executions using PID files. 
+ It takes name of the test as argument and executes bash script for running this test.
 </li>
 <li><code>test-result-monitor.js</code> file checks test results via web server and send alert to slack channel. 
 Also uses the command line arguments to detect network name and url</li>
@@ -153,8 +155,8 @@ Crontab example with timeout:
 ```sh
 */10 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-sokol
 */12 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-core
-*/14 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-sokol
-*/16 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-core
+*/16 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-sokol
+*/18 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-core
 0,30 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-sokol
 5,35 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-core
 */15 * * * *  timeout -s 2 12m $POA_MONITOR_PATH/scripts/test-runner.sh txs-public-rpc-sokol
