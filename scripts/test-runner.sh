@@ -32,7 +32,7 @@ else
   fi
 fi
 
-# run test and send full path as argument
+# run test
 $POA_MONITOR_PATH/scripts/$1.sh
 
 rm $PIDFILE
