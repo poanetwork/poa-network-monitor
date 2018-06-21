@@ -132,11 +132,17 @@ function gotReplacement(blockHeader) {
         console.log("reorgToNumber: " + reorgToNumber);
     }
     console.log("-- reorg " + blockHeader.number);
-    let changedBlock = {excluded: blocks[blockHeader.number], accepted: blockHeader};
+
     // save changed block, wait until receiving all changed blocks, then save reorg
-    reorg.changedBlocks.push(changedBlock);
+    let excludedBlock = blocks[blockHeader.number];
+    if (excludedBlock && excludedBlock.hash !== blockHeader.hash) {
+        let changedBlock = {excluded: excludedBlock, accepted: blockHeader};
+        console.log("changedBlock: " + JSON.stringify(changedBlock));
+        reorg.changedBlocks.push(changedBlock);
+    }
+
     // will not exist if before an block with higher number was received (can happen while reorg)
-    if (!blocks[blockHeader.number]) {
+    if (!excludedBlock) {
         // number of saved blocks increased, so need to remove the old one to keep number of saved blocks constant
         removeFirst();
     }
