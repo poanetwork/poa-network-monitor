@@ -80,7 +80,7 @@ It will create encrypted account using specified password and print it's address
 For the Sokol:
 
 ```sh
-node $POA_MONITOR_PATH/cripts/newAccount.js sokol http://localhost:8540 password
+node $POA_MONITOR_PATH/scripts/newAccount.js sokol http://localhost:8540 password
 ```
 Core:
 ```sh
