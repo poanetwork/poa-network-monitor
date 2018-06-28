@@ -52,8 +52,9 @@ let testHelper = {
         let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
         let tx = await web3.eth.getTransaction(receipt.transactionHash);
         let amountBN = new BN(config.amountToSend);
-        const finalBalanceFrom = await web3.eth.getBalance(tx.from);
-        console.log("initialBalanceFrom: " + initialBalanceFrom + ", finalBalanceFrom: " + finalBalanceFrom);
+        const finalBalanceFrom = await web3.eth.getBalance(tx.from, receipt.blockNumber);
+        const finalBalanceFromNow = await web3.eth.getBalance(tx.from);
+        console.log("initialBalanceFrom: " + initialBalanceFrom + ", finalBalanceFrom: " + finalBalanceFrom + ", finalBalanceFromNow: " + finalBalanceFromNow);
         const finalBalanceTo = await web3.eth.getBalance(tx.to);
         console.log("transactionHash: " + receipt.transactionHash);
         result.transactionHash = receipt.transactionHash;
