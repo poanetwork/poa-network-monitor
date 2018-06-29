@@ -55,7 +55,7 @@ let testHelper = {
         const finalBalanceFrom = await web3.eth.getBalance(tx.from, receipt.blockNumber);
         const finalBalanceFromNow = await web3.eth.getBalance(tx.from);
         console.log("initialBalanceFrom: " + initialBalanceFrom + ", finalBalanceFrom: " + finalBalanceFrom + ", finalBalanceFromNow: " + finalBalanceFromNow);
-        const finalBalanceTo = await web3.eth.getBalance(tx.to);
+        const finalBalanceTo = await web3.eth.getBalance(tx.to, receipt.blockNumber);
         console.log("transactionHash: " + receipt.transactionHash);
         result.transactionHash = receipt.transactionHash;
         if (receipt.transactionHash === undefined || receipt.transactionHash.length === 0) {
@@ -92,7 +92,7 @@ let testHelper = {
 
     /**
      * Checks if certain validator is returned as valid validator from the PoaNetworkConsensus contract
-     * @param validator
+     * @param validator, validatorsArr
      * @returns {Promise.<boolean>}
      */
     validatorExists: async function (validator, validatorsArr) {

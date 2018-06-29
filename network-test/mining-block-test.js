@@ -64,6 +64,7 @@ async function checkSeriesOfTransactions(maxRounds) {
     }
     if (validatorsMinedTxSet.size !== validatorsArr.length) {
         passed = false;
+        //determine what validator node didn't mine tx
         for (let i = 0; i < validatorsArr.length; i++) {
             if (!validatorsMinedTxSet.has(validatorsArr[i])) {
                 validatorsMissedTxs.push(validatorsArr[i]);
@@ -105,6 +106,12 @@ async function checkTxSending(validatorsArr) {
     return txResult;
 }
 
+/**
+ * Determines validator who mined tx and saves to the validatorsMinedTxSet and validatorsMinedTx
+ *
+ * @param receipt
+ * @returns {Promise.<void>}
+ */
 async function checkWhoMinedTxs(receipt) {
     lastBlock = receipt.blockNumber;
     console.log("checkWhoMinedTxs ");

@@ -38,15 +38,6 @@ function SqlDao(networkName) {
         " toBlock TEXT," +
         " changedBlocks TEXT)";
 
-    this.getMissedRounds = async function (lastSeconds) {
-        console.log("getMissedRounds, lastSeconds: " + lastSeconds);
-        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where 1 ", lastSeconds);
-    };
-
-    this.getFailedMissedRounds = async function (lastSeconds) {
-        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where passed = 0 ", lastSeconds);
-    };
-
     this.createMissingRoundsTable = function () {
         run(this.missedRoundsTableCreateSql);
     };
@@ -93,6 +84,15 @@ function SqlDao(networkName) {
     this.addToReorgsTable = function (params) {
         run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
             params);
+    };
+
+    this.getMissedRounds = async function (lastSeconds) {
+        console.log("getMissedRounds, lastSeconds: " + lastSeconds);
+        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedMissedRounds = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where passed = 0 ", lastSeconds);
     };
 
     this.getReorgs = async function (lastSeconds) {

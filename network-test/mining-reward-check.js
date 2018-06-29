@@ -13,7 +13,7 @@ const sqlDao = new SqlDao(getNetworkName());
 sqlDao.createRewardTable();
 
 /*
- * Gets the latest round and checks if any validator misses the round
+ * Gets blocks from the latest round and checks reward
  */
 async function checkMiningReward() {
     console.log("checkMiningReward");
@@ -35,8 +35,7 @@ checkMiningReward();
 /**
  * Checks if miner got right reward for block creation and adding txs to the block
  *
- * @param blocks - array of blocks (or objects with fields number and miner)
- * @param validatorsArr
+ * @param block (or objects with fields number and miner)
  * @returns {Promise.<{passed: boolean, error: string,  rewardDetails: Array}>}
  */
 async function checkBlocksRewards(block) {

@@ -146,6 +146,7 @@ async function getTests(passed, lastSeconds, testNumber) {
     let txsPublicRpcRuns;
     let reorgs;
 
+    // if no testNumber is specified then return all tests
     if (!testNumber || testNumber === 1) {
         console.log("1");
         roundsRuns = await getRoundsRuns(passed, lastSeconds);

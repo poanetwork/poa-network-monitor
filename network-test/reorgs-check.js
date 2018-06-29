@@ -28,7 +28,7 @@ function checkIsSynced(from) {
     console.log("checkIsSynced()");
     for (let i = from; i < lastBlock; i++) {
         if (!blocks[i] || !blocks[i + 1]) {
-            console.log("blocks doesn't exist");
+            console.log("block doesn't exist");
             return false;
         }
         if (blocks[i].hash !== blocks[i + 1].parentHash) {
@@ -60,6 +60,7 @@ async function checkPreviousHashesAndSave(to) {
             let changedBlock = {excluded: blocksToCheck[i], accepted: ethBlock};
             reorgToSave.changedBlocks.push(changedBlock);
             console.log("-- reorg " + i + ", from " + blocksToCheck[i].hash + " to " + ethBlock.hash);
+            //update saved block
             if (blocks[i]) {
                 blocks[i] = ethBlock;
             }
