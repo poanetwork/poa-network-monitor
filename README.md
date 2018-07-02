@@ -80,10 +80,12 @@ It will create encrypted account using specified password and print it's address
 For the Sokol:
 
 ```sh
+cd $POA_MONITOR_PATH
 node $POA_MONITOR_PATH/scripts/newAccount.js sokol http://localhost:8540 password
 ```
 Core:
 ```sh
+cd $POA_MONITOR_PATH
 node $POA_MONITOR_PATH/scripts/newAccount.js core http://localhost:8541 password
 ```
 
@@ -143,8 +145,8 @@ Script for separate run:
 
 ```sh
 #!/bin/sh <br>
-cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/test-result-monitor.js sokol http://localhost:8540 1800 >> $POA_MONITOR_PATH/logs/monitor-sokol-log 2>&1;
-node $POA_MONITOR_PATH/test-result-monitor.js core http://localhost:8541 1800 >> $POA_MONITOR_PATH/logs/monitor-core-log 2>&1
+cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/test-result-monitor.js sokol 1800 >> $POA_MONITOR_PATH/logs/monitor-sokol-log 2>&1;
+node $POA_MONITOR_PATH/test-result-monitor.js core 1800 >> $POA_MONITOR_PATH/logs/monitor-core-log 2>&1
 ```
 Scripts for monitor running are located in the <code>scripts</code> folder.
 
@@ -165,5 +167,10 @@ Crontab example with timeout:
 5,35 * * * *  timeout -s 2 15m $POA_MONITOR_PATH/scripts/test-runner.sh monitor-core
 
 ```
+
 <h3>Run web server </h3>
-<code>nohup node $POA_MONITOR_PATH/webapp/index.js >> $POA_MONITOR_PATH/logs/web_server.log 2>&1 & </code>
+
+```sh
+cd $POA_MONITOR_PATH
+nohup node $POA_MONITOR_PATH/webapp/index.js >> $POA_MONITOR_PATH/logs/web_server.log 2>&1 & 
+```

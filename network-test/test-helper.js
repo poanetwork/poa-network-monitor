@@ -39,16 +39,17 @@ let testHelper = {
      * @returns {Promise.<*>}
      */
     getValidators: async function (web3) {
-        // todo check if not empty
         const PoaNetworkConsensusContract = new web3.eth.Contract(contracts.PoaNetworkConsensusAbi, contracts.PoaNetworkConsensusAddress);
         let validatorsArr = await
             PoaNetworkConsensusContract.methods.getValidators().call();
         console.log('getValidators() ');
+        if (!validatorsArr || validatorsArr.length < 1) {
+            throw new Error("Invalid number of validators: " + validatorsArr.length);
+        }
         return validatorsArr;
     },
 
     checkTxReceipt: async function (web3, receipt, initialBalanceFrom, initialBalanceTo) {
-        // todo check tx result (status)
         let result = {passed: true, blockNumber: "", miner: "", transactionHash: "", errorMessage: ""};
         let tx = await web3.eth.getTransaction(receipt.transactionHash);
         let amountBN = new BN(config.amountToSend);

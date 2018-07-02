@@ -16,8 +16,7 @@ Slack = require('node-slackr');
 slack = new Slack(config.slackWebHookUrl, {
     channel: "#monitor"
 });
-// todo: set url
-let url = 'http://localhost:3000/' + networkName + '/api/failed?lastseconds=' + time;
+let url = config.domainName + networkName + '/api/failed?lastseconds=' + time;
 console.log("url: " + url);
 https.get(url, (resp) => {
     let data = '';
@@ -118,7 +117,6 @@ https.get(url, (resp) => {
     console.log("Error: " + err.message);
 });
 
-//todo color
 function sendAttachment(messageTitle, messageValue, includeNetworkName) {
     let messages = {
         text: includeNetworkName ? networkName : "",

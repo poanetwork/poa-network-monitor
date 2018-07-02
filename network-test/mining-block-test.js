@@ -42,7 +42,7 @@ async function checkSeriesOfTransactions(maxRounds) {
         for (let i = 0; i < validatorsArr.length; i++) {
             console.log("i: " + i);
             let transactionResult;
-            // todo from account 1 to 2 and backward
+            // todo from account 1 to 2 and backward or from node with higher balance to lower
             try {
                 transactionResult = await checkTxSending(validatorsArr);
             } catch (error) {

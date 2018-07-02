@@ -40,3 +40,6 @@ maxBlocksToSave = 20
 
 #slack
 slackWebHookUrl = 'https://hooks.slack.com/services/............token'
+
+#Monitor
+domainName = "http://localhost:3000/"
