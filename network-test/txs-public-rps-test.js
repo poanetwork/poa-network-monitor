@@ -42,6 +42,7 @@ async function sendTxsViaPublicRpc(txsNumber) {
         sqlDao.addToTxsPublicRpcTable([new Date(Date.now()).toISOString(), (transactionResult.passed) ? 1 : 0,
             transactionResult.errorMessage, transactionResult.transactionHash, transactionResult.blockNumber, transactionResult.miner]);
     }
+    sqlDao.closeDb();
 }
 
 async function sendRawTx(decryptedAccount, to, value, gas, gasPrice) {

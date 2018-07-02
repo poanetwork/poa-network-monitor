@@ -76,6 +76,7 @@ async function checkSeriesOfTransactions(maxRounds) {
     console.log('passed: ' + passed + ', JSON.stringify(validatorsMissedTxs): '
         + JSON.stringify(validatorsMissedTxs) + ', JSON.stringify(failedTxs): ' + JSON.stringify(failedTxs));
     //TODO save number of mined non-empty blocks for every validator
+    sqlDao.closeDb();
 }
 
 /*

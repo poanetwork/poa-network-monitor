@@ -26,7 +26,7 @@ async function checkMiningReward() {
         sqlDao.addToRewardTable([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, result.error,
             JSON.stringify(result.rewardDetails), JSON.stringify(result.transactions)]);
     }
-
+    sqlDao.closeDb();
 }
 
 //todo check error for all tests

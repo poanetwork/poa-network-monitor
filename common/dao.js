@@ -122,6 +122,11 @@ function SqlDao(networkName) {
     this.getFailedTxsPublicRpc = async function (lastSeconds) {
         return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where passed = 0 ", lastSeconds);
     };
+
+    this.closeDb = function () {
+        db.close();
+    };
+
 }
 
 function run(sql, params) {
