@@ -123,8 +123,8 @@ Example script for running separate test: <br>
 
 ```sh
 #!/bin/sh 
-cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/network-test/missing-rounds.js sokol http://localhost:8540 >> $POA_MONITOR_PATH/logs/missing-rounds-sokol-log 2>&1;
-node $POA_MONITOR_PATH/network-test/missing-rounds.js core http://localhost:8541 >> $POA_MONITOR_PATH/logs/missing-rounds-core-log 2>&1;
+cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/network-test/missing-rounds.js sokol ws://localhost:8450 >> $POA_MONITOR_PATH/logs/missing-rounds-sokol-log 2>&1;
+node $POA_MONITOR_PATH/network-test/missing-rounds.js core ws://localhost:8451 >> $POA_MONITOR_PATH/logs/missing-rounds-core-log 2>&1;
 ```
 
 <h6>Reorgs</h6>

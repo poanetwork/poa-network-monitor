@@ -5,6 +5,9 @@ network = "sokol" # "core" for the main and "sokol" for the test network
 # mining-block-test settings
 maxRounds = 5
 
+#missing-round test
+maxBlocks = 40
+
 # Sending txs test
 addressFromTxTest_sokol = "0x...dfcb"
 passwordFromTxTest_sokol = "password"
