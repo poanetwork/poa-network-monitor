@@ -30,7 +30,7 @@ and filled with valid settings (as account and password)  </li>
 2. Clone Github repository:
 
 ```sh
-git clone https://github.com/Natalya11444/poa-network-monitor.git
+git clone https://github.com/poanetwork/poa-network-monitor.git
 ```
 Install dependencies <br>
 
