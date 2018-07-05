@@ -6,7 +6,7 @@ const {
 const Web3 = require("web3");
 let web3 = getWeb3();
 const contracts = require("./contracts/" + getNetworkName() + "-contracts.js");
-const testData = require("./test-data/blocks.js");
+const testData = require("./unit-test/blocks.js");
 const utils = require('web3-utils');
 const BN = require('bn.js');
 
