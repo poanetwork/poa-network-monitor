@@ -1,56 +1,118 @@
 const {
     getWeb3,
-    testData,
     testHelper,
     getNetworkName
 } = require('./test-helper.js');
-let web3 = getWeb3();
+// need to use WebsocketProvider
+let web3 = getWeb3(true);
 const {SqlDao} = require('../common/dao.js');
 const sqlDao = new SqlDao(getNetworkName());
 
 sqlDao.createMissingRoundsTable();
+let blocksChecked = 0;
+let previousValidatorIndex = -1;
+let previousValidator = "";
+let previousBlockNumber = -1;
+let lastBlock = -1;
+let startValidatorIndex = -1;
+let validatorsLength = 0;
+let isFirstBlock = false;
+let currentValidatorIndex;
 
-/*
- * Gets the latest round and checks if any validator misses the round
- */
-async function checkMissingValidators() {
-    console.log("checkMissingValidators");
-    const validatorsArr = await testHelper.getValidators(web3);
-    let blocksToTest = await getBlocksFromLatestRound(validatorsArr.length);
-    let lastBlock = blocksToTest[blocksToTest.length - 1].number;
-    let result = testHelper.checkForMissedValidators(blocksToTest, validatorsArr);
-    console.log("passed: " + result.passed + ", lastBlock: " + lastBlock + ", result.missedValidators" + result.missedValidators);
-    sqlDao.addToMissingRounds([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, lastBlock, JSON.stringify(result.missedValidators)]);
-    sqlDao.closeDb();
-}
+let missingRoundsCheck = {
 
-checkMissingValidators();
+    /**
+     *Checks validator of the block
+     * @param blockHeader
+     * @param validatorsArr
+     * @returns {Promise.<Array>} - validators who missed their turn
+     */
+    checkBlock: async function (blockHeader, validatorsArr) {
+        console.log("--- checkBlock() Got new block: " + blockHeader.number + ", validator: " + blockHeader.miner +
+            ", previousValidatorIndex: " + previousValidatorIndex + ", lastBlock: " + lastBlock);
+        validatorsLength = validatorsArr.length;
+        console.log("validatorsLength: " + validatorsLength);
+        lastBlock = blockHeader.number;
+        let blocksPassed = lastBlock - previousBlockNumber;
+        console.log("blocksPassed: " + blocksPassed + ", lastBlock: " + lastBlock + ", previousBlockNumber: " + previousBlockNumber);
+        currentValidatorIndex = validatorsArr.indexOf(blockHeader.miner);
+        let missedValidators = [];
+        if (previousBlockNumber === -1  // in the begin of the test
+            || blocksPassed <= 0 // reorg
+        ) {
+            startValidatorIndex = currentValidatorIndex;
+            isFirstBlock = true;
+            console.log("begin, previousValidatorIndex: " + previousValidatorIndex);
+        } else {
+            isFirstBlock = false;
+            let expectedValidatorIndex = (previousValidatorIndex + blocksPassed) % validatorsLength;
+            let expectedValidator = validatorsArr[expectedValidatorIndex];
+            let isPassed = expectedValidator === blockHeader.miner;
+            console.log("expectedValidatorIndex: " + expectedValidatorIndex + "expectedValidator: " + expectedValidator + ", actual: " + blockHeader.miner + ", passed: " + isPassed);
+            if (!isPassed) {
+                let ind = expectedValidatorIndex;
+                // more then one validator could miss round in one time
+                // all validators in array from expected one till actual will be missed
+                let added = 0;
+                while (ind !== currentValidatorIndex && added < validatorsLength) {
+                    console.log("ind: " + ind + ", added : " + validatorsArr[ind]);
+                    missedValidators.push(validatorsArr[ind]);
+                    ind = (ind + 1) % validatorsLength;
+                    added++;
+                }
+            }
+            console.log("blocksChecked: " + blocksChecked);
+        }
+        blocksChecked++;
+        previousValidator = blockHeader.miner;
+        previousBlockNumber = lastBlock;
+        previousValidatorIndex = currentValidatorIndex;
+        return missedValidators;
+    },
 
-/**
- * Returns the array of latest blocks. Array length will be equal to the number of validators to fit the round.
- *
- * @param numberOfValidators
- * @returns {Array}
- */
-async function getBlocksFromLatestRound(numberOfValidators) {
-    const lastBlock = await web3.eth.getBlock('latest');
-    const firstNum = lastBlock.number - numberOfValidators + 1;
-    let blocks = [];
-    for (let i = 0; i < numberOfValidators; i++) {
-        blocks[i] = await web3.eth.getBlock(firstNum + i);
+    /**
+     * Checks coming blocks for validators missed their turn.
+     *
+     * @returns {Promise.<void>} {{passed: boolean, missedValidators: Array}}
+     * Returns object that contains boolean result (true if no validators missed the round) and array of validators that missed the round
+     */
+    checkComingBlocks: async function () {
+        let result = {passed: true, missedValidators: []};
+        let self = this;
+        let subscription = web3.eth.subscribe('newBlockHeaders', function (error, result) {
+            if (error)
+                console.log("subscription error: " + error);
+        }).on("data", async function (blockHeader) {
+            let validatorsArray = await testHelper.getValidators(web3);
+            let missedFromBlock = await self.checkBlock(blockHeader, validatorsArray);
+            if (missedFromBlock) {
+                for (let v of missedFromBlock) {
+                    if (result.missedValidators.indexOf(v) === -1) {
+                        result.missedValidators.push(v);
+                        result.passed = false;
+                    }
+                }
+            }
+            console.log("-- blocksChecked: " + blocksChecked + ", currentValidatorIndex: " + currentValidatorIndex + ", startValidatorIndex: " + startValidatorIndex);
+            // round is checked, save result and exit
+            // skip check for first block
+            if (!isFirstBlock && (currentValidatorIndex === startValidatorIndex)) {
+                console.log("result: " + JSON.stringify(result));
+                subscription.unsubscribe();
+                await sqlDao.addToMissingRounds([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, lastBlock, JSON.stringify(result.missedValidators)]);
+                sqlDao.closeDb();
+                process.exit(0);
+            }
+        });
     }
-    console.log("getBlocksFromLatestRound blocks.length: " + blocks.length);
-    return blocks;
-}
+};
 
-//testCheckRoundInBlocks();
+missingRoundsCheck.checkComingBlocks();
 
-/*
-Tests the checkRoundInBlocks function with custom blocks where some validators are missed.
- */
-function testCheckRoundInBlocks() {
-    console.log("testCheckRoundInBlocks");
-    let result = testHelper.checkForMissedValidators(testData.blocks, testData.validators);
-    console.log("Found missed validators: " + (!result.passed && (JSON.stringify(result.missedValidators) === JSON.stringify(
-        testData.missingValidators))));
-}
+module.exports = {
+    missingRoundsCheck
+};
+
+
+
+

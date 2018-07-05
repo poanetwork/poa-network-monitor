@@ -61,34 +61,34 @@ function SqlDao(networkName) {
         run(this.reorgsTableCreateSql);
     };
 
-    this.addToMissingRounds = function (params) {
-        run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, lastBlock, missedValidators) VALUES ( ?, ?, ?, ?)",
+    this.addToMissingRounds = async function (params) {
+        await run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, lastBlock, missedValidators) VALUES ( ?, ?, ?, ?)",
             params);
     };
 
-    this.addToRewardTable = function (params) {
-        run("INSERT INTO " + this.miningRewardTableName + " (time, passed, error, rewardDetails, transactions) VALUES ( ?, ?, ?, ?, ?)",
+    this.addToRewardTable = async function (params) {
+        await run("INSERT INTO " + this.miningRewardTableName + " (time, passed, error, rewardDetails, transactions) VALUES ( ?, ?, ?, ?, ?)",
             params);
     };
 
-    this.addToTxsTable = function (params) {
-        run("INSERT INTO " + this.missedTxsTableName + " (time, passed, lastBlock, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?, ?)",
+    this.addToTxsTable = async function (params) {
+        await run("INSERT INTO " + this.missedTxsTableName + " (time, passed, lastBlock, validatorsMissedTxs, failedTxs) VALUES ( ?, ?, ?, ?, ?)",
             params);
     };
 
-    this.addToTxsPublicRpcTable = function (params) {
-        run("INSERT INTO " + this.txsPublicRpcTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
+    this.addToTxsPublicRpcTable = async function (params) {
+        await run("INSERT INTO " + this.txsPublicRpcTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
             params);
     };
 
-    this.addToReorgsTable = function (params) {
-        run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
+    this.addToReorgsTable = async function (params) {
+        await run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
             params);
     };
 
     this.getMissedRounds = async function (lastSeconds) {
         console.log("getMissedRounds, lastSeconds: " + lastSeconds);
-        return allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where 1 ", lastSeconds);
+        return await allWithTime("SELECT * FROM " + this.missedRoundsTableName + " where 1 ", lastSeconds);
     };
 
     this.getFailedMissedRounds = async function (lastSeconds) {
@@ -130,9 +130,18 @@ function SqlDao(networkName) {
 }
 
 function run(sql, params) {
-    db.serialize(function () {
-        db.run(sql, params);
-    });
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, (err, respose) => {
+            if (err) {
+                console.log('Error running sql: ' + sql);
+                console.log(err);
+                reject(err);
+            } else {
+                resolve(respose);
+            }
+        })
+    })
+
 }
 
 function all(sql, params) {
