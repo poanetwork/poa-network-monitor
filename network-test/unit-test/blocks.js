@@ -253,7 +253,8 @@ const customData = {
             "number": 2519781
         }
     ],
-    validators: ["0xcf260ea317555637c55f70e55dba8d5ad8414cb0", "0xbc70e7a838ef3d468e25efa5ecb8946d3d0f913b",
+    validators: [
+        "0xcf260ea317555637c55f70e55dba8d5ad8414cb0", "0xbc70e7a838ef3d468e25efa5ecb8946d3d0f913b",
         "0x8e6cdfacdae218ae312ad24cb1e8cf34bb9f6b61", "0x7a6a585db8cdfa88b9e8403c054ec2e912e9d32e",
         "0x49bbdebd7f3d39f297135d7af3831ce152a99b67", "0x0f1e7c925d502855dcd31dde4703770a0cf6cdfc",
         "0x8fe38b0349b99c17242d44d5b1b859b0e941dced", "0xdc4765d9dabf6c6c4908fe97e649ef1f05cb6252",
@@ -262,9 +263,11 @@ const customData = {
         "0x28e7605a631441870e80a283aa43ae4145f82cc3", "0xdad49e6cbde849353ab27dec6319e687bfc91a41",
         "0x6e349be21acb0db3b2092fd4e3b738202842697e", "0x71300d93a8cdf93385af9635388cf2d00b95a480",
         "0x59d82a4b6068188ac06605a8416b5c7d40d6fc43"],
-    missingValidators: ["0xf1f51e933d6aad056236e0a45c1cc5b335ca1a75",
+    missingValidators: [
+        "0xf1f51e933d6aad056236e0a45c1cc5b335ca1a75",
         "0x6e4f8fc73b93ba5160fadf914603a590d4676494"],
-    validatorsToAdd: [undefined,
+    validatorsToAdd: [
+        undefined,
         undefined,
         "0x1111111111111111111111111111111111146a1a",
         undefined,
@@ -277,7 +280,8 @@ const customData = {
         "0x1111111111111111111111111111111111146a1a",
         "0x1111111111111111111111111111111111142b1b"
     ],
-    validatorsWithRemoved: ["0xcf260ea317555637c55f70e55dba8d5ad8414cb0", "0xbc70e7a838ef3d468e25efa5ecb8946d3d0f913b",
+    validatorsWithRemoved: [
+        "0xcf260ea317555637c55f70e55dba8d5ad8414cb0", "0xbc70e7a838ef3d468e25efa5ecb8946d3d0f913b",
         "0x8e6cdfacdae218ae312ad24cb1e8cf34bb9f6b61", "0x7a6a585db8cdfa88b9e8403c054ec2e912e9d32e",
         "0x49bbdebd7f3d39f297135d7af3831ce152a99b67", "0x0f1e7c925d502855dcd31dde4703770a0cf6cdfc",
         "0x8fe38b0349b99c17242d44d5b1b859b0e941dced", "0xdc4765d9dabf6c6c4908fe97e649ef1f05cb6252",

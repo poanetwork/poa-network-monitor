@@ -73,11 +73,10 @@ let missingRoundsCheck = {
     /**
      * Checks coming blocks for validators missed their turn.
      *
-     * @param getValidators - function for getting validators at the moment
      * @returns {Promise.<void>} {{passed: boolean, missedValidators: Array}}
      * Returns object that contains boolean result (true if no validators missed the round) and array of validators that missed the round
      */
-    checkComingBlocks: async function (getValidators) {
+    checkComingBlocks: async function () {
         let result = {passed: true, missedValidators: []};
         let self = this;
         let subscription = web3.eth.subscribe('newBlockHeaders', function (error, result) {

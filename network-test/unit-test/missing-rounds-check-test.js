@@ -29,6 +29,7 @@ describe('Check missing-rounds test', function () {
             }
             blockIndex++;
         }
+        // check result
         console.log("foundMissedValidators: " + foundMissedValidators);
         let skippedMissedValidators = [];
         for (let missedValidator of testData.missingValidators) {
@@ -36,6 +37,7 @@ describe('Check missing-rounds test', function () {
                 skippedMissedValidators.push(missedValidator);
             }
         }
+        // some of added validators were missed in blocks
         let skippedAddedValidators = [];
         for (let addedMissedValidator of testData.addedMissedValidators) {
             if (addedMissedValidator && foundMissedValidators.indexOf(addedMissedValidator) === -1) {
@@ -48,11 +50,11 @@ describe('Check missing-rounds test', function () {
         it('Added validators who missed round should be found', function () {
             assert.ok(skippedAddedValidators.length === 0, "Didn't find added validators who missed round: " + skippedAddedValidators);
         });
-        let foundMissed = foundMissedValidators.length;
-        let expectedMissed = testData.missingValidators.length + testData.addedMissedValidators.length;
+        let foundMissedNumber = foundMissedValidators.length;
+        let expectedMissedNumber = testData.missingValidators.length + testData.addedMissedValidators.length;
         it('Number of found missed validators should fit', function () {
-            assert.ok(foundMissed === expectedMissed,
-                "Wrong number of found missed validators: " + foundMissed + " instead of  " + expectedMissed);
+            assert.ok(foundMissedNumber === expectedMissedNumber,
+                "Wrong number of found missed validators: " + foundMissedNumber + " instead of  " + expectedMissedNumber);
         });
     });
 });
@@ -67,7 +69,7 @@ describe('Check missing-rounds test', function () {
             let blocks = testData.blocksWithRemovedValidator;
             let stepToRemove = testData.stepToRemove;
             while (blockIndex < blocks.length) {
-                // simulate validator removing on specified step, then use array with removed validator
+                // simulate validator removing on specified step, use array with removed validator for next checks
                 if (blockIndex >= stepToRemove) {
                     validators = validatorsWithRemoved;
                 }
