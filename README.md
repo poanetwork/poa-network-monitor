@@ -56,20 +56,6 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 <br>url will be http://localhost:8541
 
-<h3>Add repository path to the environment variable</h3>
-Bash scripts run on cron in it's directory so need to use absolute path. <br>
-1.Run in the terminal
-
-```sh
-sudo nano /etc/environment
-```
-2.Add repository path to the file:
-
-```sh
-POA_MONITOR_PATH="/home/user/poa-network-monitor"
-```
-3.Logout from the current user and login again so environment variables changes take place
-
 <h3>Edit the configuration file</h3>
 Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename). Specify <code>slackWebHookUrl</code>. Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>. 
 Other settings can be changed too, accounts creation is described below. 
@@ -80,13 +66,13 @@ It will create encrypted account using specified password and print it's address
 For the Sokol:
 
 ```sh
-cd $POA_MONITOR_PATH
-node $POA_MONITOR_PATH/scripts/newAccount.js sokol http://localhost:8540 password
+cd /home/user/poa-network-monitor
+node ./scripts/newAccount.js sokol http://localhost:8540 password
 ```
 Core:
 ```sh
-cd $POA_MONITOR_PATH
-node $POA_MONITOR_PATH/scripts/newAccount.js core http://localhost:8541 password
+cd /home/user/poa-network-monitor
+node ./scripts/newAccount.js core http://localhost:8541 password
 ```
 
 <h6>For sending txs test (missing-rounds.js)</h6>
@@ -106,36 +92,38 @@ Bash scripts for running tests and monitor are located in the <code>scripts</cod
 Before using first is needed to make them executable. Run in the terminal:
 
 ```sh
- chmod +x $POA_MONITOR_PATH/scripts/test-runner.sh
- chmod +x $POA_MONITOR_PATH/scripts/missing-rounds-sokol.sh
- chmod +x $POA_MONITOR_PATH/scripts/missing-rounds-core.sh
- chmod +x $POA_MONITOR_PATH/scripts/mining-reward-sokol.sh
- chmod +x $POA_MONITOR_PATH/scripts/mining-reward-core.sh
- chmod +x $POA_MONITOR_PATH/scripts/txs-sokol.sh
- chmod +x $POA_MONITOR_PATH/scripts/txs-core.sh
- chmod +x $POA_MONITOR_PATH/scripts/txs-public-rpc-sokol.sh
- chmod +x $POA_MONITOR_PATH/scripts/txs-public-rpc-core.sh
- chmod +x $POA_MONITOR_PATH/scripts/monitor-sokol.sh
- chmod +x $POA_MONITOR_PATH/scripts/monitor-core.sh
+ chmod +x /home/user/poa-network-monitor/scripts/test-runner.sh
+ chmod +x /home/user/poa-network-monitor/scripts/missing-rounds-sokol.sh
+ chmod +x /home/user/poa-network-monitor/scripts/missing-rounds-core.sh
+ chmod +x /home/user/poa-network-monitor/scripts/mining-reward-sokol.sh
+ chmod +x /home/user/poa-network-monitor/scripts/mining-reward-core.sh
+ chmod +x /home/user/poa-network-monitor/scripts/txs-sokol.sh
+ chmod +x /home/user/poa-network-monitor/scripts/txs-core.sh
+ chmod +x /home/user/poa-network-monitor/scripts/txs-public-rpc-sokol.sh
+ chmod +x /home/user/poa-network-monitor/scripts/txs-public-rpc-core.sh
+ chmod +x /home/user/poa-network-monitor/scripts/monitor-sokol.sh
+ chmod +x /home/user/poa-network-monitor/scripts/monitor-core.sh
  ```
   <br>
 Example script for running separate test: <br>
 
 ```sh
 #!/bin/sh 
-cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/network-test/missing-rounds.js sokol ws://localhost:8450 >> $POA_MONITOR_PATH/logs/missing-rounds-sokol-log 2>&1;
-node $POA_MONITOR_PATH/network-test/missing-rounds.js core ws://localhost:8451 >> $POA_MONITOR_PATH/logs/missing-rounds-core-log 2>&1;
+cd /home/user/poa-network-monitor; node ./network-test/missing-rounds.js sokol ws://localhost:8450 >> ./logs/missing-rounds-sokol-log 2>&1;
+node ./network-test/missing-rounds.js core ws://localhost:8451 >> ./logs/missing-rounds-core-log 2>&1;
 ```
 
 <h6>Reorgs</h6>
 Run reorgs test for the each network:
 
 ```sh
-nohup node $POA_MONITOR_PATH/network-test/reorgs-check.js core ws://localhost:8451  >> $POA_MONITOR_PATH/logs/reorgs_core.log 2>&1 &
+cd /home/user/poa-network-monitor;
+nohup node ./network-test/reorgs-check.js core ws://localhost:8451  >> ./logs/reorgs_core.log 2>&1 &
 ```
 
 ```sh
-nohup node $POA_MONITOR_PATH/network-test/reorgs-check.js sokol ws://localhost:8450  >> $POA_MONITOR_PATH/logs/reorgs_sokol.log 2>&1 &
+cd /home/user/poa-network-monitor;
+nohup node ./network-test/reorgs-check.js sokol ws://localhost:8450  >> ./logs/reorgs_sokol.log 2>&1 &
 ```
 Test for reorgs runs continuously so it's not needed to add it on cron.
 
@@ -145,8 +133,8 @@ Script for separate run:
 
 ```sh
 #!/bin/sh <br>
-cd $POA_MONITOR_PATH; node $POA_MONITOR_PATH/test-result-monitor.js sokol 1800 >> $POA_MONITOR_PATH/logs/monitor-sokol-log 2>&1;
-node $POA_MONITOR_PATH/test-result-monitor.js core 1800 >> $POA_MONITOR_PATH/logs/monitor-core-log 2>&1
+cd /home/user/poa-network-monitor; node ./test-result-monitor.js sokol 1800 >> ./logs/monitor-sokol-log 2>&1;
+node ./test-result-monitor.js core 1800 >> ./logs/monitor-core-log 2>&1
 ```
 Scripts for monitor running are located in the <code>scripts</code> folder.
 
@@ -155,22 +143,22 @@ Run <code>sudo crontab -e -u user</code> <br>
 Crontab example with timeout: 
 
 ```sh
-*/10 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-sokol
-*/12 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh missing-rounds-core
-*/16 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-sokol
-*/18 * * * *  timeout -s 2 8m $POA_MONITOR_PATH/scripts/test-runner.sh mining-reward-core
-0,30 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-sokol
-5,35 * * * *  timeout -s 2 25m $POA_MONITOR_PATH/scripts/test-runner.sh txs-core
-*/15 * * * *  timeout -s 2 12m $POA_MONITOR_PATH/scripts/test-runner.sh txs-public-rpc-sokol
-*/17 * * * *  timeout -s 2 12m $POA_MONITOR_PATH/scripts/test-runner.sh txs-public-rpc-core
-0,30 * * * *  timeout -s 2 15m $POA_MONITOR_PATH/scripts/test-runner.sh monitor-sokol
-5,35 * * * *  timeout -s 2 15m $POA_MONITOR_PATH/scripts/test-runner.sh monitor-core
+*/10 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-sokol
+*/12 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-core
+*/16 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-sokol
+*/18 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-core
+0,30 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-sokol
+5,35 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-core
+*/15 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-sokol
+*/17 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-core
+0,30 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-sokol
+5,35 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-core
 
 ```
 
 <h3>Run web server </h3>
 
 ```sh
-cd $POA_MONITOR_PATH
-nohup node $POA_MONITOR_PATH/webapp/index.js >> $POA_MONITOR_PATH/logs/web_server.log 2>&1 & 
+cd /home/user/poa-network-monitor;
+nohup node ./webapp/index.js >> ./logs/web_server.log 2>&1 & 
 ```
