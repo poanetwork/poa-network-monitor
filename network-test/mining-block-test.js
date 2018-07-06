@@ -47,6 +47,7 @@ async function checkSeriesOfTransactions(maxRounds) {
                 transactionResult = await checkTxSending(validatorsArr);
             } catch (error) {
                 console.error(error);
+                passed = false;
                 return error;
             }
             if (!transactionResult.passed) {
@@ -99,7 +100,7 @@ async function checkTxSending(validatorsArr) {
         });
     } catch (error) {
         console.error("error in sendTransaction: " + error);
-        return error;
+        return {passed: false, blockNumber: "", miner: "", transactionHash: "", errorMessage: "" + error};
     }
     await checkWhoMinedTxs(receipt);
     let txResult = await testHelper.checkTxReceipt(web3, receipt, initialBalanceFrom, initialBalanceTo);
