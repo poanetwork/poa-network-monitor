@@ -1,10 +1,9 @@
 #!/bin/bash
 
-echo "POA_MONITOR_PATH:"
-echo $POA_MONITOR_PATH
 echo "$1"
 
-PIDFILE=$POA_MONITOR_PATH/scripts/pids/$1
+cd "${BASH_SOURCE%/*}"
+PIDFILE=./pids/$1
 
 if [ -f $PIDFILE ]
 then
@@ -33,6 +32,6 @@ else
 fi
 
 # run test
-$POA_MONITOR_PATH/scripts/$1.sh
+./$1.sh
 
 rm $PIDFILE
