@@ -27,7 +27,7 @@ async function checkRewardTransfers() {
         }
         let result = await checkValidatorRewardTransfer(validator);
         await sqlDao.addToRewardTransfer([new Date(Date.now()).toISOString(), (result.passed) ? 1 : 0, result.validator,
-            result.payoutKey, result.error, result.blockNumber, JSON.stringify(result.transaction)]);
+            result.payoutKey, result.error, result.blockNumber, JSON.stringify(result.transferTx), JSON.stringify(result.otherTxs)]);
     }
     sqlDao.closeDb();
 }
@@ -35,7 +35,7 @@ async function checkRewardTransfers() {
 checkRewardTransfers();
 
 async function checkValidatorRewardTransfer(validator) {
-    console.log('checkValidatorRewardTransfer(), validator: ' + validator);
+    console.log('---- checkValidatorRewardTransfer(), validator: ' + validator);
     let payoutKey = await
         KeysManagerContract.methods.getPayoutByMining(validator).call();
     console.log('payoutKey: ' + payoutKey);
@@ -44,7 +44,8 @@ async function checkValidatorRewardTransfer(validator) {
         validator: validator,
         payoutKey: payoutKey,
         error: "",
-        transaction: {},
+        transferTx: {},
+        otherTxs: [],
         blockNumber: ""
     };
     if (payoutKey === "0x0000000000000000000000000000000000000000") {
@@ -63,17 +64,21 @@ async function checkValidatorRewardTransfer(validator) {
     for (let i = 0; i < maxAttempts; i++) {
         try {
             block = await web3.eth.getBlock(currentBlockNumber, true);
+            result.blockNumber = currentBlockNumber;
             if (block && block.transactions) {
                 block.transactions.forEach(function (tx) {
-                    if (payoutKey === tx.to) {
-                        if (tx.from !== tx.to) {
-                            console.log("found tx at: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
-                            result.transaction = tx;
-                            result.blockNumber = currentBlockNumber;
+                    if (validator === tx.from) {
+                        if (payoutKey === tx.to) {
+                            console.log("found tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
+                            result.transferTx = tx;
+                        }
+                        else {
+                            console.log("other tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
+                            result.otherTxs.push(tx);
                         }
                     }
                 });
-                if (result.transaction.to) {
+                if (result.transferTx.to) {
                     return result;
                 }
             }
@@ -81,7 +86,7 @@ async function checkValidatorRewardTransfer(validator) {
                 console.log("Didn't find tx, last block: " + block.number + " at time " + new Date(block.timestamp * 1000).toLocaleString() +
                     ", started at " + new Date(currentTimestamp).toLocaleString());
                 result.passed = false;
-                result.error = "Didn't find transaction";
+                result.error = "Didn't find transaction, checked " + i + " blocks from block: " + currentBlockNumber;
                 return result;
             }
         } catch (e) {

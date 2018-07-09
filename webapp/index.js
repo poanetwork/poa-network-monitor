@@ -55,7 +55,8 @@ async function getRewardTransferRuns(passed, lastSeconds) {
     }
     if (rewardTransferRuns.length > 0) {
         rewardTransferRuns.map(function (run) {
-            run.tx = JSON.parse(run.tx);
+            run.transferTx = JSON.parse(run.transferTx);
+            run.otherTxs = JSON.parse(run.otherTxs);
         });
     }
     return rewardTransferRuns;

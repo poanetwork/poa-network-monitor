@@ -58,6 +58,33 @@ https.get(url, (resp) => {
                 }
             }
         }
+
+        let rewardTransferTest = JSON.parse(data).rewardTransferCheck;
+        if (rewardTransferTest.runs.length > 0) {
+            console.log("rewardTransferTest didn't pass: " + JSON.stringify(rewardTransferTest.runs));
+            await sendSimpleAlert("Failed test: \n*" + rewardTransferTest.description + "*");
+            let runs = rewardTransferTest.runs;
+            for (let i = 0; i < runs.length; i++) {
+                let run = runs[i];
+                if (!run.passed) {
+                    let transferTx = "\nhash: " + run.transferTx.hash + "\nvalue: " + run.transferTx.value
+                        + "\nfrom: " + run.transferTx.from + "\nto: " + run.transferTx.to;
+                    let otherTxs = "";
+                    if (run.otherTxs && run.otherTxs.length > 0) {
+                        otherTxs += "\n*Other transactions:* ";
+                        for (let otherTx of run.otherTxs) {
+                            otherTxs += "\n\nhash: " + otherTx.hash + "\nvalue: " + otherTx.value
+                                + "\nfrom: " + otherTx.from + "\nto: " + otherTx.to;
+                        }
+                    }
+                    let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nvalidator: " + run.validator
+                        + "\npayoutKey: " + run.payoutKey + "\nthe earliest checked block: " + run.blockNumber
+                        + "\ntransfer transaction: " + transferTx + "\n" + otherTxs;
+                    await sendAttachment("", runsMessage, true);
+                }
+            }
+        }
+
         let missingTxsTest = JSON.parse(data).missingTxsCheck;
         if (missingTxsTest.runs.length > 0) {
             console.log("MissingTxsTest didn't pass: " + JSON.stringify(missingTxsTest.runs));

@@ -45,7 +45,8 @@ function SqlDao(networkName) {
         " validator TEXT," +
         " payoutKey TEXT," +
         " error TEXT," +
-        " tx TEXT," +
+        " transferTx TEXT," +
+        " otherTxs TEXT," +
         " blockNumber TEXT)";
 
     this.createMissingRoundsTable = function () {
@@ -98,7 +99,7 @@ function SqlDao(networkName) {
     };
 
     this.addToRewardTransfer = async function (params) {
-        await run("INSERT INTO " + this.rewardTransferTableName + " (time, passed, validator, payoutKey, error, blockNumber, tx) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
+        await run("INSERT INTO " + this.rewardTransferTableName + " (time, passed, validator, payoutKey, error, blockNumber, transferTx, otherTxs) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)",
             params);
     };
 
