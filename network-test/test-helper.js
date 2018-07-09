@@ -114,6 +114,7 @@ module.exports = {
     testHelper,
     getNetworkName,
     getWeb3,
+    contracts,
     getDecryptedAccount
 };
 

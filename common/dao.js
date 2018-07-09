@@ -7,6 +7,7 @@ function SqlDao(networkName) {
     this.missedTxsTableName = "missed_txs_" + networkName;
     this.txsPublicRpcTableName = "txs_public_rpc_" + networkName;
     this.reorgsTableName = "reorgs_" + networkName;
+    this.rewardTransferTableName = "reward_transfer_" + networkName;
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -38,6 +39,15 @@ function SqlDao(networkName) {
         " toBlock TEXT," +
         " changedBlocks TEXT)";
 
+    this.rewardTransferTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.rewardTransferTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " validator TEXT," +
+        " payoutKey TEXT," +
+        " error TEXT," +
+        " tx TEXT," +
+        " blockNumber TEXT)";
+
     this.createMissingRoundsTable = function () {
         run(this.missedRoundsTableCreateSql);
     };
@@ -47,18 +57,19 @@ function SqlDao(networkName) {
     };
 
     this.createTxsTable = function () {
-        console.log("createTxsTable, his.missedTxsTableCreateSql: " + this.missedTxsTableCreateSql);
         run(this.missedTxsTableCreateSql);
     };
 
     this.createTxsPublicRpcTable = function () {
-        console.log("createTxsPublicRpcTable, sql: " + this.txsPublicRpcTableCreateSql);
         run(this.txsPublicRpcTableCreateSql);
     };
 
     this.createReorgsTable = function () {
-        console.log("createReorgsTable, sql: " + this.reorgsTableCreateSql);
         run(this.reorgsTableCreateSql);
+    };
+
+    this.createRewardTransferTable = function () {
+        run(this.rewardTransferTableCreateSql);
     };
 
     this.addToMissingRounds = async function (params) {
@@ -83,6 +94,11 @@ function SqlDao(networkName) {
 
     this.addToReorgsTable = async function (params) {
         await run("INSERT INTO " + this.reorgsTableName + " (time, toBlock, changedBlocks) VALUES ( ?, ?, ?)",
+            params);
+    };
+
+    this.addToRewardTransfer = async function (params) {
+        await run("INSERT INTO " + this.rewardTransferTableName + " (time, passed, validator, payoutKey, error, blockNumber, tx) VALUES ( ?, ?, ?, ?, ?, ?, ?)",
             params);
     };
 
@@ -121,6 +137,14 @@ function SqlDao(networkName) {
 
     this.getFailedTxsPublicRpc = async function (lastSeconds) {
         return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.getRewardTransfers = async function (lastSeconds) {
+        return await allWithTime("SELECT * FROM " + this.rewardTransferTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedRewardTransfers = async function (lastSeconds) {
+        return await allWithTime("SELECT * FROM " + this.rewardTransferTableName + " where passed = 0 ", lastSeconds);
     };
 
     this.closeDb = function () {
