@@ -10,11 +10,11 @@ const sqlDao = new SqlDao(getNetworkName());
 const KeysManagerContract = new web3.eth.Contract(contracts.KeysManagerAbi, contracts.KeysManagerAddress);
 sqlDao.createRewardTransferTable();
 
+/**
+ * Checks if accumulated reward is transferred from the validator's mining key to the payout key during last hour
+ * @returns {Promise.<void>}
+ */
 async function checkRewardTransfers() {
-    console.log("checkRewardTransfer");
-    let t = await web3.eth.getTransaction("0x74f70eb95e0194a6122b8ab915a10d73c38dc6ec4c9e0422d09abbbce67ae8e6");
-    console.log("t : " + JSON.stringify(t));
-    console.log("time : " + new Date((await web3.eth.getBlock(3403830)).timestamp * 1000).toLocaleString());
     const validatorsArr = await testHelper.getValidators(web3);
     let masterOfCeremony = await
         KeysManagerContract.methods.masterOfCeremony().call();
@@ -34,10 +34,14 @@ async function checkRewardTransfers() {
 
 checkRewardTransfers();
 
+/**
+ * Checks reward transfer for the specified validator
+ * @param validator
+ * @returns {Promise.<{passed: boolean, validator: *, payoutKey: *, error: string, transferTx: {}, otherTxs: Array, blockNumber: string}>}
+ */
 async function checkValidatorRewardTransfer(validator) {
-    console.log('---- checkValidatorRewardTransfer(), validator: ' + validator);
-    let payoutKey = await
-        KeysManagerContract.methods.getPayoutByMining(validator).call();
+    console.log('--- checkValidatorRewardTransfer(), validator: ' + validator);
+    let payoutKey = await KeysManagerContract.methods.getPayoutByMining(validator).call();
     console.log('payoutKey: ' + payoutKey);
     let result = {
         passed: true,
@@ -60,28 +64,38 @@ async function checkValidatorRewardTransfer(validator) {
     let currentBlockNumber = (await web3.eth.getBlock("latest")).number;
     let block;
     // in case of errors in getting blocks
-    let maxAttempts = 800;
+    let maxAttempts = 1000;
     for (let i = 0; i < maxAttempts; i++) {
         try {
             block = await web3.eth.getBlock(currentBlockNumber, true);
             result.blockNumber = currentBlockNumber;
             if (block && block.transactions) {
-                block.transactions.forEach(function (tx) {
+                block.transactions.forEach(async function (tx) {
                     if (validator === tx.from) {
                         if (payoutKey === tx.to) {
-                            console.log("found tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
+                            console.log("found transfer tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
                             result.transferTx = tx;
                         }
                         else {
                             console.log("other tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
-                            result.otherTxs.push(tx);
+                            // check if payout key was just changed
+                            let newPayoutKey = await KeysManagerContract.methods.getPayoutByMining(validator).call();
+                            if (newPayoutKey !== tx.to) {
+                                result.otherTxs.push(tx);
+                            } else {
+                                console.log("payout key was changed, transfer tx at block: " + currentBlockNumber + " hash: " + tx.hash + ", from: " + tx.from, +", to: " + tx.to);
+                                result.transferTx = tx;
+                            }
+
                         }
                     }
                 });
                 if (result.transferTx.to) {
+                    //transfer tx is found
                     return result;
                 }
             }
+            // checked last hour
             if (hourAgoTimestamp > block.timestamp * 1000) {
                 console.log("Didn't find tx, last block: " + block.number + " at time " + new Date(block.timestamp * 1000).toLocaleString() +
                     ", started at " + new Date(currentTimestamp).toLocaleString());

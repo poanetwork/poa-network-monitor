@@ -151,6 +151,8 @@ Crontab example with timeout:
 5,35 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-core
 */15 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-sokol
 */17 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-core
+1 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-sokol
+2 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-core
 0,30 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-sokol
 5,35 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-core
 
