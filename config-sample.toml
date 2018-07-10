@@ -6,26 +6,32 @@ network = "sokol" # "core" for the main and "sokol" for the test network
 maxRounds = 5
 
 # Sending txs test
-addressFromTxTest_sokol = "0x...dfcb"
-passwordFromTxTest_sokol = "password"
-addressToTxTest_sokol = "0x...a72"
-passwordToTxTest_sokol = "password"
+addressTxTest1_sokol = "0x...dfcb"
+passwordTxTest1_sokol = "password"
+addressTxTest2_sokol = "0x...a72"
+passwordTxTest2_sokol = "password"
 
-addressFromTxTest_core = "0x"
-passwordFromTxTest_core = "password"
-addressToTxTest_core = "0x.."
-passwordToTxTest_core = "password"
+addressTxTest1_core = "0x"
+passwordTxTest1_core = "password"
+addressTxTest2_core = "0x.."
+passwordTxTest2_core = "password"
 
 #Sending txs via public RPC test
-keyStorePath_sokol = "\path\a0db34...745f0b.json"
-passwordFromPublicRpcTest_sokol = "password"
-addressToPublicRpcTest_sokol = "0x....2"
-passwordToPublicRpcTest_sokol = "password"
+keyStorePath1_sokol = "\path\a25...c.json"
+addressPublicRpcTest1_sokol = "0x.."
+passwordPublicRpcTest1_sokol = "password"
 
-keyStorePath_core = "\path\..json"
-passwordFromPublicRpcTest_core = "password"
-addressToPublicRpcTest_core = "0x...."
-passwordToPublicRpcTest_core = "password"
+keyStorePath2_sokol = "\path\ab...3a.json"
+addressPublicRpcTest2_sokol = "0x...."
+passwordPublicRpcTest2_sokol = "password"
+
+keyStorePath1_core = "\path\..json"
+addressPublicRpcTest1_core = "0x..."
+passwordPublicRpcTest1_core = "password"
+
+keyStorePath2_core = "\path\a0c43...b.json"
+addressPublicRpcTest2_core = "0x...."
+passwordPublicRpcTest2_core = "password"
 
 # Transaction settings
 gasPrice = "1000000000"

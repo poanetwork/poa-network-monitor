@@ -3,7 +3,8 @@ const {
     getWeb3,
     utils,
     testHelper,
-    getNetworkName
+    getNetworkName,
+    BN
 } = require('./test-helper.js');
 const {SqlDao} = require('../common/dao.js');
 let networkName = getNetworkName();
@@ -14,6 +15,9 @@ let validatorsMinedTx = {};
 //for saving validators who mined blocks with txs
 let validatorsMinedTxSet = new Set();
 let lastBlock;
+let accountFromAddress;
+let accountToAddress;
+let accountFromPassword;
 
 checkSeriesOfTransactions(config.maxRounds)
     .then(result => {
@@ -37,12 +41,12 @@ async function checkSeriesOfTransactions(maxRounds) {
         return error;
     }
     console.log('got validators, validatorsArr.length: ' + validatorsArr.length + ", validatorsArr: " + validatorsArr);
+    await setAccounts();
     for (let round = 0; round < maxRounds; round++) {
         console.log("checkSeriesOfTransactions round: " + round);
         for (let i = 0; i < validatorsArr.length; i++) {
             console.log("i: " + i);
             let transactionResult;
-            // todo from account 1 to 2 and backward or from node with higher balance to lower
             try {
                 transactionResult = await checkTxSending(validatorsArr);
             } catch (error) {
@@ -80,22 +84,40 @@ async function checkSeriesOfTransactions(maxRounds) {
     sqlDao.closeDb();
 }
 
+/**
+ * Detects account with the greatest balance for sending txs from. It allows to prevent wallet emptying
+ * @returns {Promise.<void>}
+ */
+async function setAccounts() {
+    console.log("setAccounts()");
+    let accountOneBalance = await web3.eth.getBalance(config["addressTxTest1_" + networkName]);
+    let accountTwoBalance = await web3.eth.getBalance(config["addressTxTest2_" + networkName]);
+    console.log("accountOneBalance: " + accountOneBalance + ", accountTwoBalance: " + accountTwoBalance);
+    let accountFromNumber = new BN(accountOneBalance).gt(new BN(accountTwoBalance)) ? 1 : 2;
+    let accountToNumber = accountFromNumber === 1 ? 2 : 1;
+    console.log("accountFromNumber: " + accountFromNumber + ", accountToNumber: " + accountToNumber);
+
+    accountFromAddress = config["addressTxTest" + accountFromNumber + "_" + networkName];
+    accountToAddress = config["addressTxTest" + accountToNumber + "_" + networkName];
+    accountFromPassword = config["passwordTxTest" + accountFromNumber + "_" + networkName];
+    console.log("accountFromAddress: " + accountFromAddress + ", accountToAddress: " + accountToAddress);
+}
+
 /*
 Sends transaction, checks it was confirmed and balance changed properly
  */
 async function checkTxSending(validatorsArr) {
     console.log("checkTxSending()");
-    await web3.eth.personal.unlockAccount(config["addressFromTxTest_" + networkName], config["passwordFromTxTest_" + networkName]);
-    console.log("config.addressFromTxTest: " + config["addressFromTxTest_" + networkName]);
-    let initialBalanceFrom = await web3.eth.getBalance(config["addressFromTxTest_" + networkName]);
+    await web3.eth.personal.unlockAccount(accountFromAddress, accountFromPassword);
+    let initialBalanceFrom = await web3.eth.getBalance(accountFromAddress);
     console.log("initialBalanceFrom: " + initialBalanceFrom);
-    let initialBalanceTo = await web3.eth.getBalance(config["addressToTxTest_" + networkName]);
+    let initialBalanceTo = await web3.eth.getBalance(accountToAddress);
     let receipt;
     try {
         receipt = await sendTransaction({
-            to: config["addressToTxTest_" + networkName],
+            to: accountToAddress,
             value: config.amountToSend,
-            from: config["addressFromTxTest_" + networkName],
+            from: accountFromAddress,
             gasPrice: config.gasPrice
         });
     } catch (error) {
