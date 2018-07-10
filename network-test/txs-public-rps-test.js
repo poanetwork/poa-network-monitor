@@ -12,6 +12,10 @@ let sqlDao;
 const EthereumTx = require('ethereumjs-tx');
 let web3 = getWeb3();
 let networkName = getNetworkName();
+let accountFromPath;
+let accountFromAddress;
+let accountFromPassword;
+let accountToAddress;
 
 sendTxsViaPublicRpc(config.txsNumber)
     .then(result => {
@@ -21,16 +25,35 @@ sendTxsViaPublicRpc(config.txsNumber)
         console.log("Error in sendTxsViaPublicRpc: " + err);
     });
 
+/**
+ * Detects account with the greatest balance for sending txs from. It allows to prevent wallet emptying
+ * @returns {Promise.<void>}
+ */
+async function setAccounts() {
+    let accountOneBalance = await web3.eth.getBalance(config["addressPublicRpcTest1_" + networkName]);
+    let accountTwoBalance = await web3.eth.getBalance(config["addressPublicRpcTest2_" + networkName]);
+    console.log("accountOneBalance: " + accountOneBalance + ", accountTwoBalance: " + accountTwoBalance);
+    let accountFromNumber = new BN(accountOneBalance).gt(new BN(accountTwoBalance)) ? 1 : 2;
+    let accountToNumber = accountFromNumber === 1 ? 2 : 1;
+    console.log("accountFromNumber: " + accountFromNumber + ", accountToNumber: " + accountToNumber);
+
+    accountFromPath = config["keyStorePath" + accountFromNumber + "_" + networkName];
+    accountFromAddress = config["addressPublicRpcTest" + accountFromNumber + "_" + networkName];
+    accountFromPassword = config["passwordPublicRpcTest" + accountFromNumber + "_" + networkName];
+    accountToAddress = config["addressPublicRpcTest" + accountToNumber + "_" + networkName];
+    console.log("accountFromAddress: " + accountFromAddress + ", accountToAddress: " + accountToAddress + ", accountFromPath: " + accountFromPath);
+}
+
 // periodically send txs via public rpc endpoint
 async function sendTxsViaPublicRpc(txsNumber) {
-    //todo different account
     sqlDao = new SqlDao(networkName);
     sqlDao.createTxsPublicRpcTable();
-    let decryptedAccount = getDecryptedAccount();
+    await setAccounts();
+    let decryptedAccount = getDecryptedAccount(accountFromPath, accountFromPassword);
     for (let i = 0; i < txsNumber; i++) {
         let initialBalanceFrom = await web3.eth.getBalance(decryptedAccount.address);
-        let initialBalanceTo = await web3.eth.getBalance(config["addressToPublicRpcTest_" + networkName]);
-        let txReceipt = await sendRawTx(decryptedAccount, config["addressToPublicRpcTest_" + networkName], config.amountToSend, config.simpleTransactionGas, config.gasPrice);
+        let initialBalanceTo = await web3.eth.getBalance(accountToAddress);
+        let txReceipt = await sendRawTx(decryptedAccount, accountToAddress, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
         let transactionResult;
         try {
             transactionResult = await testHelper.checkTxReceipt(web3, txReceipt, initialBalanceFrom, initialBalanceTo);

@@ -17,15 +17,21 @@ addressTxTest2_core = "0x.."
 passwordTxTest2_core = "password"
 
 #Sending txs via public RPC test
-keyStorePath_sokol = "\path\a0db34...745f0b.json"
-passwordFromPublicRpcTest_sokol = "password"
-addressToPublicRpcTest_sokol = "0x....2"
-passwordToPublicRpcTest_sokol = "password"
+keyStorePath1_sokol = "\path\a25...c.json"
+addressPublicRpcTest1_sokol = "0x.."
+passwordPublicRpcTest1_sokol = "password"
 
-keyStorePath_core = "\path\..json"
-passwordFromPublicRpcTest_core = "password"
-addressToPublicRpcTest_core = "0x...."
-passwordToPublicRpcTest_core = "password"
+keyStorePath2_sokol = "\path\ab...3a.json"
+addressPublicRpcTest2_sokol = "0x...."
+passwordPublicRpcTest2_sokol = "password"
+
+keyStorePath1_core = "\path\..json"
+addressPublicRpcTest1_core = "0x..."
+passwordPublicRpcTest1_core = "password"
+
+keyStorePath2_core = "\path\a0c43...b.json"
+addressPublicRpcTest2_core = "0x...."
+passwordPublicRpcTest2_core = "password"
 
 # Transaction settings
 gasPrice = "1000000000"

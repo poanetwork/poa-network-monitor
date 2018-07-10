@@ -1,7 +1,6 @@
 const {
     config,
     getNetworkName,
-    keyStore
 } = require('../common/config.js');
 const Web3 = require("web3");
 let web3 = getWeb3();
@@ -9,6 +8,7 @@ const contracts = require("./contracts/" + getNetworkName() + "-contracts.js");
 const testData = require("./unit-test/blocks.js");
 const utils = require('web3-utils');
 const BN = require('bn.js');
+const fs = require('fs');
 
 function getWeb3(isWebsocket) {
     let url = "";
@@ -27,10 +27,20 @@ function getWeb3(isWebsocket) {
     return new Web3(new Web3.providers.HttpProvider(url));
 }
 
-function getDecryptedAccount() {
-    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(keyStore), config["passwordFromPublicRpcTest_" + getNetworkName()]);
+function getDecryptedAccount(path, password) {
+    const decryptedAccount = web3.eth.accounts.decrypt(JSON.parse(getKeystore(path)), password);
     console.log('decryptedAccount.address: ' + decryptedAccount.address);
     return decryptedAccount;
+}
+
+function getKeystore(path) {
+    let keyStore;
+    try {
+        keyStore = fs.readFileSync(path);
+    } catch (error) {
+        console.log("error in reading keyStore file: " + error);
+    }
+    return keyStore;
 }
 
 let testHelper = {
@@ -93,7 +103,8 @@ let testHelper = {
 
     /**
      * Checks if certain validator is returned as valid validator from the PoaNetworkConsensus contract
-     * @param validator, validatorsArr
+     * @param validator
+     * @param validatorsArr
      * @returns {Promise.<boolean>}
      */
     validatorExists: async function (validator, validatorsArr) {
