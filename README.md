@@ -14,6 +14,8 @@ for working with sqlite database.
 </li>
 <li><code>webapp</code> folder contains web server for retrieving test results
 </li>
+<li><code>client</code> folder contains React app 
+</li>
 <li><code>scripts</code> folder contains script for new accounts creating and bash scripts for running tests and monitor.
 <code>test-runner.sh</code> file contains logic to prevent duplicate test executions using PID files. 
  It takes name of the test as argument and executes bash script for running this test.
@@ -163,4 +165,19 @@ Crontab example with timeout:
 ```sh
 cd /home/user/poa-network-monitor;
 nohup node ./webapp/index.js >> ./logs/web_server.log 2>&1 & 
+```
+
+<h3>Run UI </h3>
+
+Install dependencies <br>
+
+```sh
+cd /home/user/poa-network-monitor/client
+npm install
+```
+
+Run
+
+```sh
+nohup npm start & 
 ```
