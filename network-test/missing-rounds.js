@@ -39,6 +39,7 @@ let missingRoundsCheck = {
         let missedValidators = [];
         if (previousBlockNumber === -1  // in the begin of the test
             || blocksPassed <= 0 // reorg
+            || blocksPassed >= validatorsLength // parity or VM could be paused
         ) {
             startValidatorIndex = currentValidatorIndex;
             isFirstBlock = true;

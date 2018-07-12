@@ -45,6 +45,23 @@ app.get('/core/api/failed', async function (request, response) {
     sendJson(result, response);
 });
 
+async function getRewardTransferRuns(passed, lastSeconds) {
+    let rewardTransferRuns = [];
+    if (passed) {
+        rewardTransferRuns = await sqlDao.getRewardTransfers(lastSeconds);
+    }
+    else {
+        rewardTransferRuns = await sqlDao.getFailedRewardTransfers(lastSeconds);
+    }
+    if (rewardTransferRuns.length > 0) {
+        rewardTransferRuns.map(function (run) {
+            run.transferTx = JSON.parse(run.transferTx);
+            run.otherTxs = JSON.parse(run.otherTxs);
+        });
+    }
+    return rewardTransferRuns;
+}
+
 async function getRoundsRuns(passed, lastSeconds) {
     let roundsRuns = [];
     if (passed) {
@@ -140,11 +157,17 @@ async function getTests(passed, lastSeconds, testNumber) {
         reorgs: []
     };
 
+    let resultRewardTransfer = {
+        description: "Check reward transfer from the mining key to payout key ",
+        runs: []
+    };
+
     let txsRuns;
     let roundsRuns;
     let rewardsRuns;
     let txsPublicRpcRuns;
     let reorgs;
+    let rewardTransferRuns;
 
     // if no testNumber is specified then return all tests
     if (!testNumber || testNumber === 1) {
@@ -170,12 +193,18 @@ async function getTests(passed, lastSeconds, testNumber) {
         reorgs = await getReorgs(lastSeconds);
         resultReorgs.reorgs = reorgs;
     }
+    if (!testNumber || testNumber === 6) {
+        rewardTransferRuns = await getRewardTransferRuns(passed, lastSeconds);
+        resultRewardTransfer.runs = rewardTransferRuns;
+    }
+
     return {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
         miningRewardCheck: resultMiningReward,
         txsViaPublicRpcCheck: resultTxsPublicRpc,
-        reorgsCheck: resultReorgs
+        reorgsCheck: resultReorgs,
+        rewardTransferCheck: resultRewardTransfer
     };
 }
 
@@ -190,6 +219,7 @@ function createTablesForNetwork(sqlDao) {
     sqlDao.createTxsTable();
     sqlDao.createTxsPublicRpcTable();
     sqlDao.createReorgsTable();
+    sqlDao.createRewardTransferTable();
 }
 
 function getLastSeconds(request) {
@@ -203,7 +233,7 @@ function getLastSeconds(request) {
 function getTestIndex(request) {
     // todo with enum
     let test = parseInt(request.query["test"]);
-    if (typeof test !== 'number' || test < 1 || test > 5) {
+    if (typeof test !== 'number' || test < 1 || test > 6) {
         test = undefined;
     }
     console.log("test number: " + test);
