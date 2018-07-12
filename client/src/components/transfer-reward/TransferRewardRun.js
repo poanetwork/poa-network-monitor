@@ -6,6 +6,7 @@ import TxElement from "../TxElement";
 function TransferRewardRun(props) {
     let iconSrc = props.run.passed === 1 ? passedImg : failedImg;
     let otherTxsLabel = props.run.otherTxs.length > 0 ? "Other transactions:" : "";
+    let transferTx = props.run.transferTx.hash ? <TxElement tx={props.run.transferTx}/> : "";
     return (
         <tr>
             <th scope="row">{props.run.id}</th>
@@ -16,11 +17,10 @@ function TransferRewardRun(props) {
                 Payout key: {props.run.payoutKey}</td>
             <td>{props.run.blockNumber}</td>
             <td><strong>Transfer transaction:</strong>
-                <TxElement tx={props.run.transferTx}/>
+                {transferTx}
                 <br/>
                 <strong>{otherTxsLabel}</strong>
-                {props.run.otherTxs.map(t => <TxElement tx={t}/>)
-                }
+                {props.run.otherTxs.map(t => <TxElement tx={t}/>)}
             </td>
         </tr>
     );
