@@ -59,7 +59,9 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 <br>url will be http://localhost:8541
 
 <h3>Edit the configuration file</h3>
-Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename). Specify <code>slackWebHookUrl</code>. Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>. 
+Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename). 
+Specify <code>slackWebHookUrl</code> and <code>channel</code>. 
+Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>. 
 Other settings can be changed too, accounts creation is described below. 
 
 <h3>Create test accounts</h3>
