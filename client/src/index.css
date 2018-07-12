@@ -1,0 +1,59 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.formElement {
+    padding: 15px 15px 15px 15px;
+}
+
+.table {
+    padding: 15px 30px 15px 30px;
+}
+
+.logo {
+    background-color: rgb(89, 50, 162);
+}
+
+.logo-element {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    vertical-align: middle
+}
+
+table td {
+    padding: 2px !important;
+    vertical-align: middle !important;
+}
+
+td div {
+    vertical-align: middle
+}
+
+.search-button {
+    background-color: rgb(89, 50, 162) !important;
+}
+
+table th {
+    background-color: rgb(241, 231, 254) !important;
+}
+
+.passed-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.inline-element {
+    display: inline-block !important;
+}
+
+.form-card {
+    padding: 25px 30px 5px 30px;
+}
+
+.form-header {
+    background-color: rgb(241, 231, 254) !important;
+    text-align: left;
+}
