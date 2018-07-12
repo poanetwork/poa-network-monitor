@@ -67,8 +67,11 @@ https.get(url, (resp) => {
             for (let i = 0; i < runs.length; i++) {
                 let run = runs[i];
                 if (!run.passed) {
-                    let transferTx = "\nhash: " + run.transferTx.hash + "\nvalue: " + run.transferTx.value
-                        + "\nfrom: " + run.transferTx.from + "\nto: " + run.transferTx.to;
+                    let transferTx = "";
+                    if (run.transferTx.hash) {
+                        transferTx = "\n*Transfer transaction:* " + "\nhash: " + run.transferTx.hash + "\nvalue: " + run.transferTx.value
+                            + "\nfrom: " + run.transferTx.from + "\nto: " + run.transferTx.to;
+                    }
                     let otherTxs = "";
                     if (run.otherTxs && run.otherTxs.length > 0) {
                         otherTxs += "\n*Other transactions:* ";
@@ -79,7 +82,7 @@ https.get(url, (resp) => {
                     }
                     let runsMessage = "Time: " + run.time + "\nerror: " + run.error + "\nvalidator: " + run.validator
                         + "\npayoutKey: " + run.payoutKey + "\nthe earliest checked block: " + run.blockNumber
-                        + "\ntransfer transaction: " + transferTx + "\n" + otherTxs;
+                        + transferTx + "\n" + otherTxs;
                     await sendAttachment("", runsMessage, true);
                 }
             }
@@ -132,8 +135,10 @@ https.get(url, (resp) => {
                         let blocksMessage = "";
                         console.log("j: " + j);
                         let changedBlock = blocks[j];
-                        blocksMessage += "\n*Excluded block:*\nnumber: " + changedBlock.excluded.number + "\nhash: " + changedBlock.excluded.hash + "\nminer: " + changedBlock.excluded.miner +
-                            "\n\n*Accepted block:*\nnumber: " + changedBlock.accepted.number + "\nhash: " + changedBlock.accepted.hash + "\nminer: " + changedBlock.accepted.miner;
+                        blocksMessage += "\n*Excluded block:*\nnumber: " + changedBlock.excluded.number + "\nhash: " + changedBlock.excluded.hash
+                            + "\ntimestamp: " + changedBlock.excluded.timestamp + "\nminer: " + changedBlock.excluded.miner +
+                            "\n\n*Accepted block:*\nnumber: " + changedBlock.accepted.number + "\nhash: " + changedBlock.accepted.hash
+                            + "\ntimestamp: " + changedBlock.accepted.timestamp + "\nminer: " + changedBlock.accepted.miner;
                         await sendAttachment("", blocksMessage, false);
                     }
                 }
