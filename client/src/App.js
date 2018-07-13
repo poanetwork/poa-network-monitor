@@ -27,7 +27,7 @@ class App extends Component {
         missingTxsCheckDescription: "Check that all validator nodes are able to mine non-empty blocks",
         missingTxsRuns: [],
 
-        rewardDescription: "Check if payout script works properly for all nodes (check mining address balance)",
+        rewardDescription: "Check validator rewards",
         rewardRuns: [],
 
         transferRewardDescription: "Check reward transfer from the mining key to payout key",
