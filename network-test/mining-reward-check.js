@@ -48,7 +48,7 @@ async function checkBlocksRewards(block) {
     console.log("config.miningReward: " + config.miningReward);
     //reward will be different if there are txs
     for (let j = 0; j < block.transactions.length; j++) {
-        let details = {hash: "", price: "", value: "", to: "", from: ""};
+        let details = {hash: "", price: "", value: "", to: "", from: "", blockNumber: ""};
         let tx = await web3.eth.getTransaction(block.transactions[j]);
         let gasPrice = new BN(tx.gasPrice);
         let receipt = await web3.eth.getTransactionReceipt(block.transactions[j]);
@@ -62,6 +62,7 @@ async function checkBlocksRewards(block) {
         console.log("receipt.to: " + tx.to);
         details.price = transactionPrice.toString();
         details.value = tx.value;
+        details.blockNumber = block.number;
         if (!(tx.from === block.miner)) {
             expectedBalanceIncrease = expectedBalanceIncrease.add(transactionPrice);
         }

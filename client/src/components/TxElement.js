@@ -10,6 +10,7 @@ function TxElement(props) {
             <div>gasUsed: {props.tx.gasUsed}</div>
             <div>gasPrice: {props.tx.gasPrice}</div>
             <div>price: {props.tx.price}</div>
+            <div>block: {props.tx.blockNumber}</div>
             <br/>
         </div>
     );

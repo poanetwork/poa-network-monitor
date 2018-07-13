@@ -14,7 +14,7 @@ process.argv.forEach(function (val, index, array) {
 });
 Slack = require('node-slackr');
 slack = new Slack(config.slackWebHookUrl, {
-    channel: "#monitor"
+    channel: "#" + config.channel
 });
 let url = config.domainName + networkName + '/api/failed?lastseconds=' + time;
 console.log("url: " + url);
@@ -152,7 +152,7 @@ https.get(url, (resp) => {
 function sendAttachment(messageTitle, messageValue, includeNetworkName) {
     let messages = {
         text: includeNetworkName ? networkName : "",
-        channel: "#monitor",
+        channel: "#" + config.channel,
         attachments: [
             {
                 fallback: "Detected failed tests",
@@ -182,7 +182,7 @@ function sendAttachment(messageTitle, messageValue, includeNetworkName) {
 function sendSimpleAlert(messageText) {
     let messages = {
         text: messageText,
-        channel: "#monitor"
+        channel: "#" + config.channel
     };
     return new Promise((resolve, reject) => {
         slack.notify(messages, (err, result) => {

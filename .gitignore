@@ -1,6 +1,7 @@
 /.idea
 *.iml
 /node_modules
+/client/node_modules
 /poa_monitor.db
 /config.toml
 npm-debug.log*
