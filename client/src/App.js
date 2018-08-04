@@ -221,7 +221,7 @@ class App extends Component {
             <div className="table"><TestDescription description={this.state.rewardDescription}/>
                 <RewardList rewardRuns={this.state.rewardRuns}/>
             </div>,
-            <div className="table"><TestDescription description={this.state.txsInfuraDescription}/>
+            <div className="table"><TestDescription description={this.state.txsPublicRpcDescription}/>
                 <TxsPublicRpcList txsPublicRpcRuns={this.state.txsPublicRpcRuns}/>
             </div>,
             <div className="table"><TestDescription description={this.state.reorgsDescription}/>
