@@ -6,10 +6,10 @@ const {
     sendTxsViaPublicRpc
 } = require('./txs-public-rpc-helper.js');
 
-sendTxsViaPublicRpc(config.txsNumber, false)
+sendTxsViaPublicRpc(config.txsNumber, true)
     .then(result => {
-        console.log("sendTxsViaPublicRpc done ");
+        console.log("txs-infura-test done ");
     })
     .catch(err => {
-        console.log("Error in sendTxsViaPublicRpc: " + err);
+        console.log("Error in txs-infura-test: " + err.stack);
     });

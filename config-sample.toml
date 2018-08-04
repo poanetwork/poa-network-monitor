@@ -33,6 +33,15 @@ keyStorePath2_core = "\path\a0c43...b.json"
 addressPublicRpcTest2_core = "0x...."
 passwordPublicRpcTest2_core = "password"
 
+# Sending txs via Infura test
+keyStorePathInfura1_core = "/path/UTC--.."
+addressInfura1_core = "0x.."
+passwordInfura1_core = "password"
+
+keyStorePathInfura2_core = "/path/UTC--.."
+addressInfura2_core = "0x.."
+passwordInfura2_core = "password"
+
 # Transaction settings
 gasPrice = "1000000000"
 simpleTransactionGas = "21000"

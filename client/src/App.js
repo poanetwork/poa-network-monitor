@@ -38,6 +38,10 @@ class App extends Component {
 
         reorgsDescription: "Check for reorgs",
         reorgs: [],
+
+        txsInfuraDescription: "Periodically send txs via Infura endpoint",
+        txsInfuraRuns: [],
+
         loading: false,
     };
 
@@ -81,6 +85,7 @@ class App extends Component {
         const newTransferRewardRuns = data.rewardTransferCheck.runs.map(convertResults);
         const newTxsPublicRpcRuns = data.txsViaPublicRpcCheck.runs.map(convertResults);
         const newReorgs = data.reorgsCheck.reorgs.map(convertResults);
+        const newTxsInfuraRuns = data.txsViaInfuraCheck.runs.map(convertResults);
         const newState = Object.assign({}, this.state, {
             missingRoundsRuns: newMissingRoundsRuns.reverse(),
             missingTxsRuns: newMissingTxsRuns.reverse(),
@@ -88,6 +93,7 @@ class App extends Component {
             transferRewardRuns: newTransferRewardRuns.reverse(),
             txsPublicRpcRuns: newTxsPublicRpcRuns.reverse(),
             reorgs: newReorgs.reverse(),
+            txsInfuraRuns: newTxsInfuraRuns.reverse(),
             loading: false,
         });
         console.log("newState: " + JSON.stringify(newState));
@@ -154,6 +160,7 @@ class App extends Component {
                                 <option value={4}>Sending txs via public rpc</option>
                                 <option value={5}>Reorgs</option>
                                 <option value={6}>Reward transfer</option>
+                                <option value={7}>Sending txs via Infura</option>
                             </Input>
                         </FormGroup>
 
@@ -195,6 +202,11 @@ class App extends Component {
                 <TestDescription description={this.state.transferRewardDescription}/>
                 <TransferRewardList transferRewardRuns={this.state.transferRewardRuns}/>
                 <br/>
+
+                <TestDescription description={this.state.txsInfuraDescription}/>
+                <TxsPublicRpcList txsPublicRpcRuns={this.state.txsInfuraRuns}/>
+                <br/>
+
             </div>,
             <div className="table">
                 <TestDescription description={this.state.missingRoundsDescription}/>
@@ -209,7 +221,7 @@ class App extends Component {
             <div className="table"><TestDescription description={this.state.rewardDescription}/>
                 <RewardList rewardRuns={this.state.rewardRuns}/>
             </div>,
-            <div className="table"><TestDescription description={this.state.txsPublicRpcDescription}/>
+            <div className="table"><TestDescription description={this.state.txsInfuraDescription}/>
                 <TxsPublicRpcList txsPublicRpcRuns={this.state.txsPublicRpcRuns}/>
             </div>,
             <div className="table"><TestDescription description={this.state.reorgsDescription}/>
@@ -217,6 +229,9 @@ class App extends Component {
             </div>,
             <div className="table"><TestDescription description={this.state.transferRewardDescription}/>
                 <TransferRewardList transferRewardRuns={this.state.transferRewardRuns}/>
+            </div>,
+            <div className="table"><TestDescription description={this.state.txsInfuraDescription}/>
+                <TxsPublicRpcList txsPublicRpcRuns={this.state.txsInfuraRuns}/>
             </div>
         ];
         return testElements[this.state.test];
