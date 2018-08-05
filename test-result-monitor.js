@@ -116,6 +116,19 @@ https.get(url, (resp) => {
             }
         }
 
+        let txsInfuraTest = JSON.parse(data).txsViaInfuraCheck;
+        if (txsInfuraTest.runs.length > 0) {
+            console.log("txsInfuraTest didn't pass: " + JSON.stringify(txsInfuraTest.runs));
+            await sendSimpleAlert("Failed test: \n*" + txsInfuraTest.description + "*");
+            let runs = txsInfuraTest.runs;
+            for (let i = 0; i < runs.length; i++) {
+                let run = runs[i];
+                if (!run.passed) {
+                    await sendAttachment("", "Time: " + run.time + "\nerror message: " + run.errorMessage + "\ntransaction hash: " + run.transactionHash +
+                        "\nblock number: " + run.blockNumber + "\nminer: " + run.miner, true);
+                }
+            }
+        }
 
         let reorgsCheckTest = JSON.parse(data).reorgsCheck;
         if (reorgsCheckTest.reorgs.length > 0) {

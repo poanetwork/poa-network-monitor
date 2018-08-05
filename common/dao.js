@@ -6,6 +6,7 @@ function SqlDao(networkName) {
     this.miningRewardTableName = "mining_reward_" + networkName;
     this.missedTxsTableName = "missed_txs_" + networkName;
     this.txsPublicRpcTableName = "txs_public_rpc_" + networkName;
+    this.txsInfuraTableName = "txs_Infura_" + networkName;
     this.reorgsTableName = "reorgs_" + networkName;
     this.rewardTransferTableName = "reward_transfer_" + networkName;
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -27,6 +28,14 @@ function SqlDao(networkName) {
         " failedTxs TEXT)";
 
     this.txsPublicRpcTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.txsPublicRpcTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " errorMessage TEXT," +
+        " transactionHash TEXT," +
+        " blockNumber TEXT," +
+        " miner TEXT)";
+
+    this.txsInfuraTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.txsInfuraTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
         " errorMessage TEXT," +
@@ -65,6 +74,10 @@ function SqlDao(networkName) {
         run(this.txsPublicRpcTableCreateSql);
     };
 
+    this.createTxsInfuraTable = function () {
+        run(this.txsInfuraTableCreateSql);
+    };
+
     this.createReorgsTable = function () {
         run(this.reorgsTableCreateSql);
     };
@@ -90,6 +103,11 @@ function SqlDao(networkName) {
 
     this.addToTxsPublicRpcTable = async function (params) {
         await run("INSERT INTO " + this.txsPublicRpcTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
+            params);
+    };
+
+    this.addToTxsInfuraTable = async function (params) {
+        await run("INSERT INTO " + this.txsInfuraTableName + " (time, passed, errorMessage, transactionHash, blockNumber, miner) VALUES ( ?, ?, ?, ?, ?, ?)",
             params);
     };
 
@@ -136,8 +154,16 @@ function SqlDao(networkName) {
         return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where 1 ", lastSeconds);
     };
 
+    this.getTxsInfura = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.txsInfuraTableName + " where 1 ", lastSeconds);
+    };
+
     this.getFailedTxsPublicRpc = async function (lastSeconds) {
         return allWithTime("SELECT * FROM " + this.txsPublicRpcTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.getFailedTxsInfura = async function (lastSeconds) {
+        return allWithTime("SELECT * FROM " + this.txsInfuraTableName + " where passed = 0 ", lastSeconds);
     };
 
     this.getRewardTransfers = async function (lastSeconds) {

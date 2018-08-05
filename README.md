@@ -83,12 +83,15 @@ node ./scripts/newAccount.js core http://localhost:8541 password
 1. Create 2 accounts (in each network), add POA to the one of them. For the Sokol network test POA can be added <a href="https://faucet-sokol.herokuapp.com/">here</a> <br>
 2. Add created addresses and passwords to the <code>Sending txs test</code> section of the <code>config.toml</code> file. <code>addressFrom..</code> must be address with POA
 
-<h6>For sending txs via public RPC test (txs-public-rpc-test.js)</h6>
- This test can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file. <br>
+<h6>For sending txs via public RPC test (txs-public-rpc-test.js) and Infura (txs-infura-test.js)</h6>
+ This tests can't unlock account as it uses remote node, so it creates raw tx and signs with private key. For getting public and private keys it uses keystore file. <br>
 1.Create 2 accounts in each network, add POA to the one of them. <br>
 2.Add created addresses and passwords to the <code>Sending txs via public RPC test</code> section of the config.toml file. <br>
 3.Add path to the keystore of the account with poa (<code>keyStorePath</code> parameter).
  Keystore file is usually located in the <code>~/.local/share/io.parity.ethereum/keys/</code> folder.
+<br>
+Repeat these steps for the txs-infura-test.js as it needs separate accounts. Save accounts parameters in the <code>Sending txs via Infura test</code>
+section of the config.
 
 <h3>Setup scripts for running monitor and tests. </h3>
 <h6>Tests</h6>
@@ -141,6 +144,7 @@ Crontab example with timeout:
 */17 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-core
 1 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-sokol
 2 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-core
+*/18 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-infura-core
 7,37 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-sokol
 8,38 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-core
 

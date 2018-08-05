@@ -136,6 +136,17 @@ async function getReorgs(lastSeconds) {
     return reorgs;
 }
 
+async function getTxsInfuraRuns(passed, lastSeconds) {
+    let txsInfuraRuns = [];
+    if (passed) {
+        txsInfuraRuns = await sqlDao.getTxsInfura(lastSeconds);
+    }
+    else {
+        txsInfuraRuns = await sqlDao.getFailedTxsInfura(lastSeconds);
+    }
+    return txsInfuraRuns;
+}
+
 async function getTests(passed, lastSeconds, testNumber) {
     console.log("getTests testNumber: " + testNumber);
     let resultMissingRounds = {description: "Check if any validator nodes are missing rounds", runs: []};
@@ -162,12 +173,18 @@ async function getTests(passed, lastSeconds, testNumber) {
         runs: []
     };
 
+    let resultTxsInfura = {
+        description: "Periodically send txs via Infura endpoint",
+        runs: []
+    };
+
     let txsRuns;
     let roundsRuns;
     let rewardsRuns;
     let txsPublicRpcRuns;
     let reorgs;
     let rewardTransferRuns;
+    let txsInfuraRuns;
 
     // if no testNumber is specified then return all tests
     if (!testNumber || testNumber === 1) {
@@ -197,6 +214,10 @@ async function getTests(passed, lastSeconds, testNumber) {
         rewardTransferRuns = await getRewardTransferRuns(passed, lastSeconds);
         resultRewardTransfer.runs = rewardTransferRuns;
     }
+    if (!testNumber || testNumber === 7) {
+        txsInfuraRuns = await getTxsInfuraRuns(passed, lastSeconds);
+        resultTxsInfura.runs = txsInfuraRuns;
+    }
 
     return {
         missingRoundCheck: resultMissingRounds,
@@ -204,7 +225,8 @@ async function getTests(passed, lastSeconds, testNumber) {
         miningRewardCheck: resultMiningReward,
         txsViaPublicRpcCheck: resultTxsPublicRpc,
         reorgsCheck: resultReorgs,
-        rewardTransferCheck: resultRewardTransfer
+        rewardTransferCheck: resultRewardTransfer,
+        txsViaInfuraCheck: resultTxsInfura
     };
 }
 
@@ -220,6 +242,7 @@ function createTablesForNetwork(sqlDao) {
     sqlDao.createTxsPublicRpcTable();
     sqlDao.createReorgsTable();
     sqlDao.createRewardTransferTable();
+    sqlDao.createTxsInfuraTable();
 }
 
 function getLastSeconds(request) {
