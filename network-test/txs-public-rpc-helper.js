@@ -31,7 +31,7 @@ async function setAccounts() {
     let accountToNumber = accountFromNumber === 1 ? 2 : 1;
     console.log("accountFromNumber: " + accountFromNumber + ", accountToNumber: " + accountToNumber);
 
-    accountFromPath = config["keyStorePath" + accountFromNumber + "_" + networkName];
+    accountFromPath = config["keyStorePath" + testName + accountFromNumber + "_" + networkName];
     accountFromAddress = config["address" + testName + accountFromNumber + "_" + networkName];
     accountFromPassword = config["password" + testName + accountFromNumber + "_" + networkName];
     accountToAddress = config["address" + testName + accountToNumber + "_" + networkName];
@@ -53,13 +53,19 @@ async function sendTxsViaPublicRpc(txsNumber, isInfuraTest) {
     for (let i = 0; i < txsNumber; i++) {
         let initialBalanceFrom = await web3.eth.getBalance(decryptedAccount.address);
         let initialBalanceTo = await web3.eth.getBalance(accountToAddress);
-        let txReceipt = await sendRawTx(decryptedAccount, accountToAddress, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
         let transactionResult;
         try {
+            let txReceipt = await sendRawTx(decryptedAccount, accountToAddress, config.amountToSend, config.simpleTransactionGas, config.gasPrice);
             transactionResult = await testHelper.checkTxReceipt(web3, txReceipt, initialBalanceFrom, initialBalanceTo);
         } catch (error) {
             console.error(error);
-            return error;
+            transactionResult = {
+                passed: false,
+                blockNumber: "",
+                miner: "",
+                transactionHash: "",
+                errorMessage: error.message
+            };
         }
         console.log("transactionResult: " + JSON.stringify(transactionResult));
         if (isInfura) {
