@@ -62,6 +62,22 @@ async function getRewardTransferRuns(passed, lastSeconds) {
     return rewardTransferRuns;
 }
 
+async function getRewardByBlockRuns(passed, lastSeconds) {
+    let rewardByBlockRuns = [];
+    if (passed) {
+        rewardByBlockRuns = await sqlDao.getRewardByBlock(lastSeconds);
+    }
+    else {
+        rewardByBlockRuns = await sqlDao.getFailedRewardByBlock(lastSeconds);
+    }
+    if (rewardByBlockRuns.length > 0) {
+        rewardByBlockRuns.map(function (run) {
+            run.error = JSON.parse(run.error);
+        });
+    }
+    return rewardByBlockRuns;
+}
+
 async function getRoundsRuns(passed, lastSeconds) {
     let roundsRuns = [];
     if (passed) {
@@ -173,6 +189,11 @@ async function getTests(passed, lastSeconds, testNumber) {
         runs: []
     };
 
+    let resultRewardByBlock = {
+        description: "Check reward by block (EmissionFunds contract, Mining and Payout keys balances)",
+        runs: []
+    };
+
     let resultTxsInfura = {
         description: "Periodically send txs via Infura endpoint",
         runs: []
@@ -181,6 +202,7 @@ async function getTests(passed, lastSeconds, testNumber) {
     let txsRuns;
     let roundsRuns;
     let rewardsRuns;
+    let rewardsByBlockRuns;
     let txsPublicRpcRuns;
     let reorgs;
     let rewardTransferRuns;
@@ -218,11 +240,16 @@ async function getTests(passed, lastSeconds, testNumber) {
         txsInfuraRuns = await getTxsInfuraRuns(passed, lastSeconds);
         resultTxsInfura.runs = txsInfuraRuns;
     }
+    if (!testNumber || testNumber === 8) {
+        rewardsByBlockRuns = await getRewardByBlockRuns(passed, lastSeconds);
+        resultRewardByBlock.runs = rewardsByBlockRuns;
+    }
 
     return {
         missingRoundCheck: resultMissingRounds,
         missingTxsCheck: resultMissingTxs,
         miningRewardCheck: resultMiningReward,
+        rewardByBlockCheck: resultRewardByBlock,
         txsViaPublicRpcCheck: resultTxsPublicRpc,
         reorgsCheck: resultReorgs,
         rewardTransferCheck: resultRewardTransfer,
@@ -243,6 +270,7 @@ function createTablesForNetwork(sqlDao) {
     sqlDao.createReorgsTable();
     sqlDao.createRewardTransferTable();
     sqlDao.createTxsInfuraTable();
+    sqlDao.createRewardByBlockTable();
 }
 
 function getLastSeconds(request) {
@@ -256,7 +284,7 @@ function getLastSeconds(request) {
 function getTestIndex(request) {
     // todo with enum
     let test = parseInt(request.query["test"]);
-    if (typeof test !== 'number' || test < 1 || test > 6) {
+    if (typeof test !== 'number' || test < 1 || test > 8) {
         test = undefined;
     }
     console.log("test number: " + test);

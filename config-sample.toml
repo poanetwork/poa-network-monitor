@@ -47,8 +47,13 @@ gasPrice = "1000000000"
 simpleTransactionGas = "21000"
 simpleTransactionCost = "21000000000000" # equals to gas multipty by gascost: 21000 * 1000000000
 amountToSend = "20000000000"
-miningReward = "1000000000000000000"
 txsNumber = 10
+
+#Block reward settings
+miningReward = "1000000000000000000"
+emissionFundsAmount = "1000000000000000000"
+emissionFundsContractAddress_sokol = "0x523B6539Ff08d72A6C8Bb598Af95bF50c1EA839C"
+emissionFundsContractAddress_core = "0x548806f2215f44571431292f2314480c3f519044"
 
 # Reorgs settings
 maxBlocksToSave = 20

@@ -12,6 +12,7 @@ import RewardList from "./components/reward-check/RewardList";
 import TransferRewardList from "./components/transfer-reward/TransferRewardList";
 import TxsPublicRpcList from "./components/txs-public-rpc/TxsPublicRpcList";
 import ReorgsList from "./components/reorgs/ReorgsList";
+import RewardByBlockList from "./components/block-reward/RewardByBlockList";
 
 class App extends Component {
     state = {
@@ -32,6 +33,9 @@ class App extends Component {
 
         transferRewardDescription: "Check reward transfer from the mining key to payout key",
         transferRewardRuns: [],
+
+        rewardByBlockDescription: "Check reward by block (EmissionFunds contract balance, Mining and Payout keys balances) ",
+        rewardByBlockRuns: [],
 
         txsPublicRpcDescription: "Periodically send txs via public rpc endpoint",
         txsPublicRpcRuns: [],
@@ -83,6 +87,7 @@ class App extends Component {
         const newMissingTxsRuns = data.missingTxsCheck.runs.map(convertResults);
         const newRewardRuns = data.miningRewardCheck.runs.map(convertResults);
         const newTransferRewardRuns = data.rewardTransferCheck.runs.map(convertResults);
+        const newRewardByBlockRuns = data.rewardByBlockCheck.runs.map(convertResults);
         const newTxsPublicRpcRuns = data.txsViaPublicRpcCheck.runs.map(convertResults);
         const newReorgs = data.reorgsCheck.reorgs.map(convertResults);
         const newTxsInfuraRuns = data.txsViaInfuraCheck.runs.map(convertResults);
@@ -91,6 +96,7 @@ class App extends Component {
             missingTxsRuns: newMissingTxsRuns.reverse(),
             rewardRuns: newRewardRuns.reverse(),
             transferRewardRuns: newTransferRewardRuns.reverse(),
+            rewardByBlockRuns: newRewardByBlockRuns.reverse(),
             txsPublicRpcRuns: newTxsPublicRpcRuns.reverse(),
             reorgs: newReorgs.reverse(),
             txsInfuraRuns: newTxsInfuraRuns.reverse(),
@@ -161,6 +167,7 @@ class App extends Component {
                                 <option value={5}>Reorgs</option>
                                 <option value={6}>Reward transfer</option>
                                 <option value={7}>Sending txs via Infura</option>
+                                <option value={8}>Reward by block</option>
                             </Input>
                         </FormGroup>
 
@@ -207,6 +214,10 @@ class App extends Component {
                 <TxsPublicRpcList txsPublicRpcRuns={this.state.txsInfuraRuns}/>
                 <br/>
 
+                <TestDescription description={this.state.rewardByBlockDescription}/>
+                <RewardByBlockList rewardByBlockRuns={this.state.rewardByBlockRuns}/>
+                <br/>
+
             </div>,
             <div className="table">
                 <TestDescription description={this.state.missingRoundsDescription}/>
@@ -232,6 +243,9 @@ class App extends Component {
             </div>,
             <div className="table"><TestDescription description={this.state.txsInfuraDescription}/>
                 <TxsPublicRpcList txsPublicRpcRuns={this.state.txsInfuraRuns}/>
+            </div>,
+            <div className="table"><TestDescription description={this.state.rewardByBlockDescription}/>
+                <RewardByBlockList rewardByBlockRuns={this.state.rewardByBlockRuns}/>
             </div>
         ];
         return testElements[this.state.test];
