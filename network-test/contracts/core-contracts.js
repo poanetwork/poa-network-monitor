@@ -1360,7 +1360,8 @@ const contracts = {
         }
     ],
     KeysManagerAddress: "0xCd9D0C11b0b3C91280CB70F2356d948f2BA93d88",
-    PoaNetworkConsensusAddress: "0xa105Db0e6671C7B5f4f350ff1Af6460E6C696e71"
+    PoaNetworkConsensusAddress: "0xa105Db0e6671C7B5f4f350ff1Af6460E6C696e71",
+    EmissionFundsAddress: "0x548806f2215f44571431292f2314480c3f519044"
 };
 
 module.exports = contracts;

@@ -79,7 +79,7 @@ async function checkEmissionFunds() {
     let result = {
         error: null,
     };
-    let emissionFundsContractAddress = config["emissionFundsContractAddress_" + networkName];
+    let emissionFundsContractAddress = contracts.EmissionFundsAddress;
     console.log('checkEmissionFunds(), contract address: ' + emissionFundsContractAddress);
     let expectedEmission = new BN(config.emissionFundsAmount);
     let actualEmission;
