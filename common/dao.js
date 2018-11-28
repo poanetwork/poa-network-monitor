@@ -65,7 +65,7 @@ function SqlDao(networkName) {
     this.rewardByBlockTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.rewardByBlockTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
-        " block TEXT," +
+        " block INTEGER," +
         " validator TEXT," +
         " payoutKey TEXT," +
         " error TEXT)";
@@ -208,7 +208,7 @@ function SqlDao(networkName) {
     };
 
     this.getLatestRewardByBlockRecord = async function () {
-        return await all("SELECT * FROM " + this.rewardByBlockTableName + " where ID = (SELECT MAX(id)  FROM " + this.rewardByBlockTableName + ") ");
+        return await all("SELECT * FROM " + this.rewardByBlockTableName + " where block = (SELECT MAX(block)  FROM " + this.rewardByBlockTableName + ") ");
     };
 
 

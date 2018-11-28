@@ -142,10 +142,10 @@ Crontab example with timeout:
 5,35 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-core
 */15 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-sokol
 */17 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-public-rpc-core
-1 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-sokol
-2 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-core
-*/20 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 10m ./scripts/test-runner.sh reward-by-block-core
-*/23 * * * * cd /home/natalia/poa-network-monitor; timeout -s 2 10m ./scripts/test-runner.sh reward-by-block-sokol
+1 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-sokol
+2 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh reward-transfer-core
+*/3 * * * * cd /home/user/poa-network-monitor; timeout -s 2 2m ./scripts/test-runner.sh reward-by-block-core
+*/4 * * * * cd /home/user/poa-network-monitor; timeout -s 2 2m ./scripts/test-runner.sh reward-by-block-sokol
 */18 * * * * cd /home/user/poa-network-monitor; timeout -s 2 12m ./scripts/test-runner.sh txs-infura-core
 7,37 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-sokol
 8,38 * * * * cd /home/user/poa-network-monitor; timeout -s 2 15m ./scripts/test-runner.sh monitor-core

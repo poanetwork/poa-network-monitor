@@ -6,11 +6,9 @@ const {
     config,
 } = require('./test-helper.js');
 let web3 = getWeb3();
-let networkName = getNetworkName();
 const {SqlDao} = require('../common/dao.js');
 const sqlDao = new SqlDao(getNetworkName());
 const KeysManagerContract = new web3.eth.Contract(contracts.KeysManagerAbi, contracts.KeysManagerAddress);
-sqlDao.createRewardByBlockTable();
 let blockToCheck;
 let masterOfCeremony;
 
@@ -20,6 +18,7 @@ checkRewardByBlock();
  Checks reward for new blocks (from the last checked)
  */
 async function checkRewardByBlock() {
+    await sqlDao.createRewardByBlockTable();
     let lastBlock = await web3.eth.getBlock('latest');
     let latestRewardByBlockRecord = await sqlDao.getLatestRewardByBlockRecord();
     let lastCheckedBlock;
@@ -112,7 +111,7 @@ async function checkEmissionFunds() {
  Checks block reward sent to validator's payout key
  */
 async function checkPayoutKeyBalance(validator) {
-    console.log('checkValidatorRewardTransfer(), validator: ' + validator);
+    console.log('checkPayoutKeyBalance(), validator: ' + validator);
     let result = {
         error: null,
         payoutKey: ""
@@ -221,7 +220,3 @@ async function checkMiningKeyBalance(validator) {
     }
     return result;
 }
-
-
-
-

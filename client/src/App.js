@@ -17,10 +17,10 @@ import RewardByBlockList from "./components/block-reward/RewardByBlockList";
 class App extends Component {
     state = {
         network: "Sokol",
-        lastSeconds: 7200,
+        lastSeconds: 3600,
         passed: "All",
         test: 0,
-        isLocalTime: false,
+        isLocalTime: true,
 
         missingRoundsDescription: "Check if any validator nodes are missing rounds",
         missingRoundsRuns: [],
