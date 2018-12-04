@@ -9,6 +9,10 @@ function SqlDao(networkName) {
     this.txsInfuraTableName = "txs_Infura_" + networkName;
     this.reorgsTableName = "reorgs_" + networkName;
     this.rewardTransferTableName = "reward_transfer_" + networkName;
+    this.rewardByBlockTableName = "reward_by_block_" + networkName;
+
+    // Create
+
     this.missedRoundsTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.missedRoundsTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " time TEXT," +
         " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
@@ -58,6 +62,14 @@ function SqlDao(networkName) {
         " otherTxs TEXT," +
         " blockNumber TEXT)";
 
+    this.rewardByBlockTableCreateSql = " CREATE TABLE IF NOT EXISTS " + this.rewardByBlockTableName + " (id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " time TEXT," +
+        " passed INTEGER NOT NULL CHECK (passed IN (0,1))," +
+        " block INTEGER," +
+        " validator TEXT," +
+        " payoutKey TEXT," +
+        " error TEXT)";
+
     this.createMissingRoundsTable = function () {
         run(this.missedRoundsTableCreateSql);
     };
@@ -85,6 +97,12 @@ function SqlDao(networkName) {
     this.createRewardTransferTable = function () {
         run(this.rewardTransferTableCreateSql);
     };
+
+    this.createRewardByBlockTable = function () {
+        run(this.rewardByBlockTableCreateSql);
+    };
+
+    // Insert
 
     this.addToMissingRounds = async function (params) {
         await run("INSERT INTO " + this.missedRoundsTableName + " (time, passed, lastBlock, missedValidators) VALUES ( ?, ?, ?, ?)",
@@ -120,6 +138,13 @@ function SqlDao(networkName) {
         await run("INSERT INTO " + this.rewardTransferTableName + " (time, passed, validator, payoutKey, error, blockNumber, transferTx, otherTxs) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)",
             params);
     };
+
+    this.addToRewardByBlockTable = async function (params) {
+        await run("INSERT INTO " + this.rewardByBlockTableName + " (time, passed, block, validator, payoutKey, error) VALUES ( ?, ?, ?, ?, ?, ?)",
+            params);
+    };
+
+    // Select
 
     this.getMissedRounds = async function (lastSeconds) {
         console.log("getMissedRounds, lastSeconds: " + lastSeconds);
@@ -173,6 +198,19 @@ function SqlDao(networkName) {
     this.getFailedRewardTransfers = async function (lastSeconds) {
         return await allWithTime("SELECT * FROM " + this.rewardTransferTableName + " where passed = 0 ", lastSeconds);
     };
+
+    this.getRewardByBlock = async function (lastSeconds) {
+        return await allWithTime("SELECT * FROM " + this.rewardByBlockTableName + " where 1 ", lastSeconds);
+    };
+
+    this.getFailedRewardByBlock = async function (lastSeconds) {
+        return await allWithTime("SELECT * FROM " + this.rewardByBlockTableName + " where passed = 0 ", lastSeconds);
+    };
+
+    this.getLatestRewardByBlockRecord = async function () {
+        return await all("SELECT * FROM " + this.rewardByBlockTableName + " where block = (SELECT MAX(block)  FROM " + this.rewardByBlockTableName + ") ");
+    };
+
 
     this.closeDb = function () {
         db.close();

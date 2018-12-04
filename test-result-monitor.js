@@ -88,6 +88,29 @@ https.get(url, (resp) => {
             }
         }
 
+        let rewardByBlockTest = JSON.parse(data).rewardByBlockCheck;
+        if (rewardByBlockTest.runs.length > 0) {
+            console.log("rewardByBlockTest didn't pass: " + JSON.stringify(rewardByBlockTest.runs));
+            await sendSimpleAlert("Failed test: \n*" + rewardByBlockTest.description + "*");
+            let runs = rewardByBlockTest.runs;
+            for (let i = 0; i < runs.length; i++) {
+                let run = runs[i];
+                if (!run.passed) {
+                    let error = "";
+                    if (run.error && run.error.length > 0) {
+                        error += "\n*Error:* ";
+                        for (let e of run.error) {
+                            error += "\n\ndescription: " + e.description + "\nexpected: " + e.expected
+                                + "\nactual: " + e.actual;
+                        }
+                    }
+                    let runsMessage = "Time: " + "\nblock: " + run.block + run.time + "\nvalidator: " + run.validator
+                        + "\npayoutKey: " + run.payoutKey + "\nerror: " + error;
+                    await sendAttachment("", runsMessage, true);
+                }
+            }
+        }
+
         let missingTxsTest = JSON.parse(data).missingTxsCheck;
         if (missingTxsTest.runs.length > 0) {
             console.log("MissingTxsTest didn't pass: " + JSON.stringify(missingTxsTest.runs));
