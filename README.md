@@ -60,7 +60,7 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 <h3>Edit the configuration file</h3>
 Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename).
-Specify <code>slackWebHookUrl</code> and <code>channel</code>.
+Specify urls for requests to Parity, <code>slackWebHookUrl</code> and <code>channel</code>.
 Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>.
 Other settings can be changed too, accounts creation is described below.
 
@@ -100,8 +100,8 @@ Example script for running separate test: <br>
 
 ```sh
 #!/bin/sh
-cd /home/user/poa-network-monitor; node ./network-test/missing-rounds.js sokol ws://localhost:8450 >> ./logs/missing-rounds-sokol-log 2>&1;
-node ./network-test/missing-rounds.js core ws://localhost:8451 >> ./logs/missing-rounds-core-log 2>&1;
+cd /home/user/poa-network-monitor; node ./network-test/mining-block-test.js core $coreRpcUrl >> ./logs/txs-core-log 2>&1;
+node ./network-test/mining-block-test.js sokol $sokolRpcUrl >> ./logs/txs-sokol-log 2>&1;
 ```
 
 <h6>Reorgs</h6>
@@ -116,7 +116,20 @@ nohup node ./network-test/reorgs-check.js core ws://localhost:8451  >> ./logs/re
 cd /home/user/poa-network-monitor;
 nohup node ./network-test/reorgs-check.js sokol ws://localhost:8450  >> ./logs/reorgs_sokol.log 2>&1 &
 ```
-Test for reorgs runs continuously so it's not needed to add it on cron.
+<h6>Missing rounds</h6>
+Run missing rounds test for the each network:
+
+```sh
+cd /home/user/poa-network-monitor;
+nohup ./scripts/test-runner.sh missing-rounds-core  >> ./logs/reorgs_core.log 2>&1 &
+```
+
+```sh
+cd /home/user/poa-network-monitor;
+nohup ./scripts/test-runner.sh missing-rounds-sokol >> ./logs/reorgs_sokol.log 2>&1 &
+```
+
+Tests for reorgs and missed rounds run continuously so it's not needed to add them on cron.
 
 <h6>Monitor</h6>
 When running monitor the time in seconds can be specified for checking last result. <br>
@@ -134,8 +147,6 @@ Run <code>sudo crontab -e -u user</code> <br>
 Crontab example with timeout:
 
 ```sh
-*/10 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-sokol
-*/12 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-core
 */16 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-sokol
 */18 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-core
 0,30 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-sokol

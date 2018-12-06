@@ -1,4 +1,6 @@
 #!/bin/bash
 
+. ../config.toml
+
 cd ../"${BASH_SOURCE%/*}"
-node ./network-test/mining-reward-check.js core http://localhost:8541 >> ./logs/mining-reward-core-log 2>&1
+node ./network-test/mining-reward-check.js core $coreRpcUrl >> ./logs/mining-reward-core-log 2>&1
