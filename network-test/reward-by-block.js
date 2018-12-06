@@ -127,8 +127,10 @@ async function checkPayoutKeyBalance(validator) {
     try {
         payoutKey = await KeysManagerContract.methods.getPayoutByMining(validator).call();
         result.payoutKey = payoutKey;
-        actualBlockReward = new BN(await web3.eth.getBalance(payoutKey, blockToCheck.number)).sub(new BN(await web3.eth.getBalance(payoutKey, blockToCheck.number - 1)));
-        console.log("actualBlockReward: " + actualBlockReward.toString() + ", expectedBlockReward: " + expectedBlockReward.toString() + ', payoutKey: ' + payoutKey);
+        let balanceAtCheckedBlock = await web3.eth.getBalance(payoutKey, blockToCheck.number);
+        let balanceAtPreviousBlock = await web3.eth.getBalance(payoutKey, blockToCheck.number - 1);
+        console.log("balanceAtCheckedBlock: " + balanceAtCheckedBlock.toString() + ", balanceAtPreviousBlock: " + balanceAtPreviousBlock.toString());
+        actualBlockReward = new BN(balanceAtCheckedBlock).sub(new BN(balanceAtPreviousBlock));
     } catch (e) {
         console.error("Error  ", e);
         result.error = {
@@ -143,14 +145,15 @@ async function checkPayoutKeyBalance(validator) {
         let gasPrice = new BN(tx.gasPrice);
         let receipt = await web3.eth.getTransactionReceipt(blockToCheck.transactions[j]);
         let transactionPrice = new BN(receipt.gasUsed).mul(gasPrice);
-        console.log("tx.from: " + tx.from + ", tx.to: " + tx.to);
+        console.log("tx.from: " + tx.from + ", tx.to: " + tx.to + ", tx.value: " + tx.value + ", transactionPrice: " + transactionPrice);
         if (tx.from === payoutKey) {
-            expectedBlockReward = expectedBlockReward.sub(new BN(tx.value).sub(transactionPrice));
+            expectedBlockReward = (expectedBlockReward.sub(new BN(tx.value)).sub(new BN(transactionPrice)));
         }
         else if (tx.to === payoutKey) {
             expectedBlockReward = expectedBlockReward.add(new BN(tx.value));
         }
     }
+    console.log("actualBlockReward: " + actualBlockReward.toString() + ", expectedBlockReward: " + expectedBlockReward.toString() + ', payoutKey: ' + payoutKey);
     let isRewardRight = actualBlockReward.eq(expectedBlockReward);
     if (!isRewardRight) {
         result.error = {
