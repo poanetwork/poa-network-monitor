@@ -116,19 +116,6 @@ nohup node ./network-test/reorgs-check.js core ws://localhost:8451  >> ./logs/re
 cd /home/user/poa-network-monitor;
 nohup node ./network-test/reorgs-check.js sokol ws://localhost:8450  >> ./logs/reorgs_sokol.log 2>&1 &
 ```
-<h6>Missing rounds</h6>
-Run missing rounds test for the each network:
-
-```sh
-cd /home/user/poa-network-monitor;
-nohup ./scripts/test-runner.sh missing-rounds-core  >> ./logs/reorgs_core.log 2>&1 &
-```
-
-```sh
-cd /home/user/poa-network-monitor;
-nohup ./scripts/test-runner.sh missing-rounds-sokol >> ./logs/reorgs_sokol.log 2>&1 &
-```
-
 Tests for reorgs and missed rounds run continuously so it's not needed to add them on cron.
 
 <h6>Monitor</h6>
@@ -147,6 +134,8 @@ Run <code>sudo crontab -e -u user</code> <br>
 Crontab example with timeout:
 
 ```sh
+*/10 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-sokol
+*/12 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh missing-rounds-core
 */16 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-sokol
 */18 * * * * cd /home/user/poa-network-monitor; timeout -s 2 8m ./scripts/test-runner.sh mining-reward-core
 0,30 * * * * cd /home/user/poa-network-monitor; timeout -s 2 25m ./scripts/test-runner.sh txs-sokol
