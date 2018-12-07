@@ -116,7 +116,7 @@ nohup node ./network-test/reorgs-check.js core ws://localhost:8451  >> ./logs/re
 cd /home/user/poa-network-monitor;
 nohup node ./network-test/reorgs-check.js sokol ws://localhost:8450  >> ./logs/reorgs_sokol.log 2>&1 &
 ```
-Tests for reorgs and missed rounds run continuously so it's not needed to add them on cron.
+Test for reorgs runs continuously so it's not needed to add it on cron.
 
 <h6>Monitor</h6>
 When running monitor the time in seconds can be specified for checking last result. <br>
