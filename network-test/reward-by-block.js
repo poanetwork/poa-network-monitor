@@ -28,6 +28,10 @@ async function checkRewardByBlock() {
     }
     else {
         lastCheckedBlock = await web3.eth.getBlock(latestRewardByBlockRecord[0].block);
+        if (!lastCheckedBlock) {
+            console.warn("Blocks are pruned");
+            lastCheckedBlock = await web3.eth.getBlock(lastBlock.number - 300);
+        }
     }
     console.log("lastBlock: " + lastBlock.number + ", lastCheckedBlock: " + lastCheckedBlock.number);
 
@@ -49,6 +53,11 @@ async function checkRewardByBlock() {
         let emissionResult = await checkEmissionFunds();
         let blockRewardResult = await checkPayoutKeyBalance(validator);
         let txsRewardResult = await checkMiningKeyBalance(validator);
+
+        if (emissionResult.isPruned || blockRewardResult.isPruned || txsRewardResult.isPruned) {
+            console.warn("Skip pruned block");
+            continue;
+        }
 
         result.passed = !emissionResult.error && !blockRewardResult.error && !txsRewardResult.error;
         result.payoutKey = blockRewardResult.payoutKey;
@@ -77,6 +86,7 @@ async function checkRewardByBlock() {
 async function checkEmissionFunds() {
     let result = {
         error: null,
+        isPruned: false
     };
     let emissionFundsContractAddress = contracts.EmissionFundsAddress;
     console.log('checkEmissionFunds(), contract address: ' + emissionFundsContractAddress);
@@ -93,6 +103,9 @@ async function checkEmissionFunds() {
             expected: "",
             actual: ""
         };
+        if (isPruningError(e)) {
+            result.isPruned = true;
+        }
         return result;
     }
     let isEmissionRight = actualEmission.eq(expectedEmission);
@@ -114,7 +127,8 @@ async function checkPayoutKeyBalance(validator) {
     console.log('checkPayoutKeyBalance(), validator: ' + validator);
     let result = {
         error: null,
-        payoutKey: ""
+        payoutKey: "",
+        isPruned: false
     };
     // Master of Ceremony doesn't have payout key
     if (validator === masterOfCeremony) {
@@ -138,6 +152,9 @@ async function checkPayoutKeyBalance(validator) {
             expected: "",
             actual: ""
         };
+        if (isPruningError(e)) {
+            result.isPruned = true;
+        }
         return result;
     }
     for (let j = 0; j < blockToCheck.transactions.length; j++) {
@@ -172,6 +189,7 @@ async function checkMiningKeyBalance(validator) {
     console.log('checkMiningKeyBalance(), validator: ' + validator);
     let result = {
         error: null,
+        isPruned: false
     };
     let actualTxsReward;
     try {
@@ -185,6 +203,9 @@ async function checkMiningKeyBalance(validator) {
             expected: "",
             actual: ""
         };
+        if (isPruningError(e)) {
+            result.isPruned = true;
+        }
         return result;
     }
 
@@ -222,4 +243,8 @@ async function checkMiningKeyBalance(validator) {
         };
     }
     return result;
+}
+
+function isPruningError(error) {
+    return error.message.includes("This request is not supported because your node is running with state pruning");
 }
