@@ -104,8 +104,8 @@ https.get(url, (resp) => {
                                 + "\nactual: " + e.actual;
                         }
                     }
-                    let runsMessage = "Time: " + "\nblock: " + run.block + run.time + "\nvalidator: " + run.validator
-                        + "\npayoutKey: " + run.payoutKey + "\nerror: " + error;
+                    let runsMessage = "Time: " + run.time + "\nblock: " + run.block + "\nvalidator: " + run.validator
+                        + "\npayoutKey: " + run.payoutKey + "\n" + error;
                     await sendAttachment("", runsMessage, true);
                 }
             }

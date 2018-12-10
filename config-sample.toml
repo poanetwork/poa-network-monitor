@@ -1,6 +1,15 @@
-#  settings
+# Default network settings
 url = "http://localhost:8545"
 network = "sokol" # "core" for the main and "sokol" for the test network
+
+# Custom network settings
+coreRpcUrl="http://localhost:8541"
+sokolRpcUrl="http://localhost:8540"
+coreWsUrl="ws://localhost:8451"
+sokolWsUrl="ws://localhost:8450"
+coreInfuraUrl="https://poa.infura.io"
+corePublicRpcUrl="https://core.poa.network"
+sokolPublicRpcUrl="https://sokol.poa.network"
 
 # mining-block-test settings
 maxRounds = 5

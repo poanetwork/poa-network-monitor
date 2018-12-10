@@ -60,7 +60,7 @@ nohup parity --chain /path/to/core/spec.json --reserved-peers /path/to/core/boot
 
 <h3>Edit the configuration file</h3>
 Rename <code>config-sample.toml</code> to the <code>config.toml</code> (or copy and rename).
-Specify <code>slackWebHookUrl</code> and <code>channel</code>.
+Specify urls for requests to Parity, <code>slackWebHookUrl</code> and <code>channel</code>.
 Webhook can be created as <a href="https://get.slack.help/hc/en-us/articles/115005265063-Incoming-WebHooks-for-Slack">here</a>.
 Other settings can be changed too, accounts creation is described below.
 
@@ -100,8 +100,8 @@ Example script for running separate test: <br>
 
 ```sh
 #!/bin/sh
-cd /home/user/poa-network-monitor; node ./network-test/missing-rounds.js sokol ws://localhost:8450 >> ./logs/missing-rounds-sokol-log 2>&1;
-node ./network-test/missing-rounds.js core ws://localhost:8451 >> ./logs/missing-rounds-core-log 2>&1;
+cd /home/user/poa-network-monitor; node ./network-test/mining-block-test.js core $coreRpcUrl >> ./logs/txs-core-log 2>&1;
+node ./network-test/mining-block-test.js sokol $sokolRpcUrl >> ./logs/txs-sokol-log 2>&1;
 ```
 
 <h6>Reorgs</h6>
